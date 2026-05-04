@@ -1,0 +1,28 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import ConsultBanner from "@/components/ConsultBanner";
+
+export const metadata: Metadata = {
+  title: "LG전자 BEST SHOP",
+  description: "LG전자 BEST SHOP 용산전자 상담 신청 페이지",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="ko" className="h-full antialiased">
+      <body className="min-h-full flex flex-col">
+        <Header />
+        {children}
+        {/* 상담 문의 공통 섹션 */}
+        <ConsultBanner />
+        <Footer />
+      </body>
+    </html>
+  );
+}

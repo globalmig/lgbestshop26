@@ -1,0 +1,127 @@
+"use client";
+
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { slides } from "@/data/slides";
+
+const floatingButtons = [
+  { src: "/images/main/btn/reservation-1.png", alt: "상담 신청", size: 64 },
+  { src: "/images/main/btn/kakaotalk.png", alt: "카카오톡 상담", size: 56 },
+  { src: "/images/main/btn/insta.png", alt: "인스타그램", size: 56 },
+  { src: "/images/main/btn/blog.png", alt: "블로그", size: 56 },
+];
+
+export default function HeroSlider() {
+  const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const total = slides.length;
+
+  const startTimer = () => {
+    timerRef.current = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % total);
+    }, 4000);
+  };
+
+  useEffect(() => {
+    if (!paused) startTimer();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [paused]);
+
+  const go = (index: number) => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setCurrent((index + total) % total);
+    if (!paused) startTimer();
+  };
+
+  const slide = slides[current];
+
+  return (
+    <section className="relative h-[580px] overflow-hidden">
+      {slides.map((s, i) => (
+        <div
+          key={s.id}
+          className={`absolute inset-0 transition-opacity duration-700 ${i === current ? "opacity-100" : "opacity-0"}`}
+        >
+          <Image
+            src={s.image}
+            alt=""
+            fill
+            priority={i === 0}
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+        </div>
+      ))}
+
+      <button
+        type="button"
+        onClick={() => go(current - 1)}
+        className="absolute left-8 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[24px] font-light text-[#888] shadow-sm"
+        aria-label="이전 배너"
+      >
+        ‹
+      </button>
+      <button
+        type="button"
+        onClick={() => go(current + 1)}
+        className="absolute right-8 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[24px] font-light text-[#888] shadow-sm"
+        aria-label="다음 배너"
+      >
+        ›
+      </button>
+
+      <div className="relative z-10 mx-auto flex h-full max-w-[1080px] items-center px-5">
+        <div className="mb-10">
+          <p className="mb-4 text-[31px] font-medium tracking-[-0.05em]">
+            {slide.subtitle}
+          </p>
+          <h1 className="whitespace-pre-line text-[56px] font-black leading-[1.12] tracking-[-0.07em]">
+            {slide.title}
+          </h1>
+        </div>
+      </div>
+
+      <div className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2">
+        <span className="text-[10px] font-medium text-[#f1b7a1]">
+          {String(current + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+        </span>
+        {slides.map((s, i) => (
+          <button
+            key={s.id}
+            type="button"
+            onClick={() => go(i)}
+            aria-label={`${i + 1}번 배너`}
+            className={`rounded-full transition-all duration-300 ${
+              i === current ? "h-2 w-7 bg-[#c90f45]" : "h-1 w-1 bg-[#d9eff4]"
+            }`}
+          />
+        ))}
+        <button
+          type="button"
+          onClick={() => setPaused((p) => !p)}
+          className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[9px] font-black text-[#9a9a9a]"
+          aria-label={paused ? "배너 재생" : "배너 일시정지"}
+        >
+          {paused ? "▶" : "Ⅱ"}
+        </button>
+      </div>
+
+      <div className="absolute right-[7.2%] top-[430px] z-20 hidden flex-col items-center gap-3 lg:flex">
+        {floatingButtons.map((btn) => (
+          <a href="#consult" key={btn.alt} aria-label={btn.alt}>
+            <Image
+              src={btn.src}
+              alt={btn.alt}
+              width={btn.size}
+              height={btn.size}
+              className="drop-shadow-sm"
+            />
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
