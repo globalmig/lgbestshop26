@@ -363,7 +363,7 @@ function CoinIcon() {
 
 function CardVisual({ card, size = "lg" }: { card: CardData; size?: "sm" | "lg" }) {
   const isLg = size === "lg";
-  return <Image src={card.image} alt={card.company} width={isLg ? 200 : 90} height={isLg ? 320 : 144} className={`h-auto rounded-xl shadow-md ${isLg ? "w-50" : "w-[90px]"}`} />;
+  return <Image src={card.image} alt={card.company} width={isLg ? 200 : 90} height={isLg ? 320 : 144} className={`rounded-xl shadow-md ${isLg ? "w-50" : "w-[90px]"}`} style={{ height: "auto" }} />;
 }
 
 export default function CardTab() {
@@ -375,7 +375,7 @@ export default function CardTab() {
 
   return (
     <section className="bg-white py-16">
-      <div className="mx-auto w-full max-w-6xl px-5">
+      <div className="mx-auto w-full max-w-[1440px]  px-5">
         {/* Header */}
         <div className="mb-10 text-center">
           <p className="mb-3 text-[13px] font-medium text-[#c90f45]">제휴 카드 혜택도 있나요?</p>
@@ -388,8 +388,8 @@ export default function CardTab() {
         </div>
 
         {/* Card Tab Selector */}
-        <div className="mb-10 overflow-x-auto">
-          <div className="flex gap-3 pb-2" style={{ minWidth: "max-content" }}>
+        <div className="mb-10 overflow-x-auto w-full">
+          <div className="flex gap-3 pb-2 bg-white justify-between" style={{ minWidth: "max-content" }}>
             {cards.map((card) => {
               const isActive = card.id === activeId;
               return (
@@ -401,7 +401,7 @@ export default function CardTab() {
                     setDetailOpen(false);
                     setNotesOpen(false);
                   }}
-                  className="flex flex-col items-center gap-2"
+                  className="flex flex-col items-center   gap-2"
                 >
                   <span
                     className={`rounded-full px-4 py-1.5 text-[13px] font-bold transition-colors ${
@@ -424,12 +424,12 @@ export default function CardTab() {
         </div>
 
         {/* Selected Card Detail */}
-        <div className="mb-0 rounded-t-2xl border border-b-0 border-[#e8e8e8] bg-white">
+        <div className="mb-0 rounded-t-2xl border border-b-0 border-[#e8e8e8] bg-white ">
           <div className="p-8">
             <h3 className="mb-8 text-[22px] font-black tracking-[-0.04em] text-[#1a1a1a]">{active.fullName}</h3>
-            <div className="flex gap-10">
+            <div className="flex gap-20">
               {/* Left: card image */}
-              <div className="flex shrink-0 flex-col items-center gap-3">
+              <div className="flex shrink-0 flex-col items-center gap-3 ">
                 <CardVisual card={active} size="lg" />
                 <button type="button" className="text-[13px] text-[#555] hover:text-[#1a1a1a]">
                   카드 정보 자세히 보기 &gt;

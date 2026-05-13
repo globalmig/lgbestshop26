@@ -17,7 +17,7 @@ export default function Benefit({ bg }: BenefitProps) {
   return (
     <section className="relative overflow-hidden py-20">
       <Image src={bg} alt="" fill sizes="100vw" className="object-cover object-center" />
-      <div className="relative z-10 mx-auto max-w-[1080px] px-5">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-5">
         <div className="mb-12 text-center">
           <p className="mb-3 text-[13px] font-medium text-[#c90f45]">가전 구독하면 무엇이 좋은가요?</p>
           <h2 className="text-[30px] font-black leading-[1.3] tracking-[-0.05em] text-[#1a1a1a]">
@@ -27,11 +27,13 @@ export default function Benefit({ bg }: BenefitProps) {
           </h2>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {benefits.map((item, i) => (
-            <div key={i} className="flex items-center justify-between rounded-2xl bg-white px-8 py-7 shadow-sm">
-              <p className="whitespace-pre-line text-[22px] font-black leading-[1.35] tracking-[-0.04em] text-[#1a1a1a]">{item.text}</p>
-              <Image src={item.icon} alt="" width={96} height={96} className="shrink-0" />
+            <div key={i} className="flex items-center justify-between rounded-2xl bg-white px-8 py-8 shadow-sm">
+              <p className="whitespace-pre-line h-full text-[2rem] pb-10 font-black leading-[1.35] tracking-[-0.04em] text-[#5E4242]">{item.text}</p>
+              <div className="h-full pt-20">
+                <Image src={item.icon} alt="" width={160} height={138} className="shrink-0" />
+              </div>
             </div>
           ))}
         </div>
