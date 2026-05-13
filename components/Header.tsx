@@ -23,7 +23,7 @@ export default function Header() {
       <header className="sticky top-0 z-30 h-11 border-b py-8 border-[#e8e8e8] bg-white">
         <div className="mx-auto flex h-full max-w-[940px] items-center justify-between px-5">
           <Link href="/" aria-label="LG전자 BEST SHOP 홈">
-            <Image src="/images/logo.png" alt="LG전자 BEST SHOP" width={160} height={40} style={{ height: "auto" }} priority />
+            <Image src="/images/logo.png" alt="LG전자 BEST SHOP" width={160} height={40} priority />
           </Link>
 
           <nav className="hidden h-full items-center gap-9 md:flex" aria-label="주요 메뉴">

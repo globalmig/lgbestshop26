@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { adminStore, type Manager } from "@/lib/adminStore";
 
 const EMPTY: Omit<Manager, "id"> = { img: "", name: "", store: "용산전자상가점", tags: [], desc: "", href: "#" };
@@ -101,16 +101,93 @@ function ManagerForm({ data, onChange }: { data: Omit<Manager, "id">; onChange: 
         <Field label="이름"><input value={data.name} onChange={(e) => f("name", e.target.value)} className={inp} /></Field>
         <Field label="지점"><input value={data.store} onChange={(e) => f("store", e.target.value)} className={inp} /></Field>
       </div>
-      <Field label="이미지 경로"><input value={data.img} onChange={(e) => f("img", e.target.value)} placeholder="/images/main/bestWorkerXX.png" className={inp} /></Field>
-      <Field label="태그 (쉼표 구분)">
-        <input
-          value={data.tags.join(", ")}
-          onChange={(e) => onChange({ ...data, tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean) })}
-          className={inp}
-        />
+      <Field label="프로필 이미지">
+        <ImgUpload value={data.img} onChange={(v) => onChange({ ...data, img: v })} />
+      </Field>
+      <Field label="태그">
+        <TagInput tags={data.tags} onChange={(tags) => onChange({ ...data, tags })} />
       </Field>
       <Field label="소개 문구"><input value={data.desc} onChange={(e) => f("desc", e.target.value)} className={inp} /></Field>
       <Field label="예약 링크"><input value={data.href} onChange={(e) => f("href", e.target.value)} className={inp} /></Field>
+    </div>
+  );
+}
+
+function ImgUpload({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => onChange(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className="flex items-center gap-4">
+      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-[#f5f5f5]">
+        {value
+          ? <img src={value} alt="" className="h-full w-full object-cover object-top" />
+          : <span className="flex h-full w-full items-center justify-center text-[22px]">👤</span>
+        }
+      </div>
+      <div>
+        <button type="button" onClick={() => fileRef.current?.click()}
+          className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45]">
+          {value ? "이미지 변경" : "이미지 업로드"}
+        </button>
+        {value && (
+          <button type="button" onClick={() => onChange("")} className="mt-1 text-[11px] text-[#bbb] hover:text-red-400">삭제</button>
+        )}
+      </div>
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+    </div>
+  );
+}
+
+function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[]) => void }) {
+  const [input, setInput] = useState("");
+
+  const add = (raw: string) => {
+    const value = raw.trim();
+    if (value && !tags.includes(value)) onChange([...tags, value]);
+    setInput("");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === "," || e.key === " ") {
+      e.preventDefault();
+      add(input);
+    } else if (e.key === "Backspace" && input === "" && tags.length > 0) {
+      onChange(tags.slice(0, -1));
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (val.endsWith(",") || val.endsWith(" ")) {
+      add(val.slice(0, -1));
+    } else {
+      setInput(val);
+    }
+  };
+
+  return (
+    <div className="flex min-h-10 flex-wrap items-center gap-1.5 rounded-lg border border-[#e8e8e8] px-3 py-2 focus-within:border-[#c90f45]">
+      {tags.map((tag) => (
+        <span key={tag} className="flex items-center gap-1 rounded-full bg-[#fdf3f5] px-2.5 py-0.5 text-[12px] text-[#c90f45]">
+          {tag}
+          <button type="button" onClick={() => onChange(tags.filter((t) => t !== tag))} className="leading-none text-[#c90f45]/50 hover:text-[#c90f45]">×</button>
+        </span>
+      ))}
+      <input
+        value={input}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        placeholder={tags.length === 0 ? "태그 입력 후 Enter·쉼표·스페이스" : ""}
+        className="min-w-30 flex-1 text-[13px] outline-none"
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { adminStore, type Slide } from "@/lib/adminStore";
 
 const EMPTY = { image: "", subtitle: "", title: "" };
@@ -46,12 +46,19 @@ export default function HeroAdmin() {
             {editing?.id === slide.id ? (
               <SlideForm data={editing} onChange={setEditing as (v: typeof editing) => void} onSave={handleSaveEdit} onCancel={() => setEditing(null)} />
             ) : (
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <p className="mb-0.5 text-[11px] text-[#aaa]">슬라이드 {slide.id}</p>
-                  <p className="text-[13px] text-[#888]">{slide.subtitle}</p>
-                  <p className="text-[16px] font-black text-[#1a1a1a]">{slide.title.replace(/\n/g, " / ")}</p>
-                  <p className="mt-1 truncate text-[11px] text-[#bbb]">{slide.image}</p>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4 min-w-0">
+                  {slide.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={slide.image} alt="" className="h-14 w-24 shrink-0 rounded-lg object-contain bg-[#f5f5f5]" />
+                  ) : (
+                    <div className="flex h-14 w-24 shrink-0 items-center justify-center rounded-lg bg-[#f5f5f5] text-[11px] text-[#bbb]">이미지 없음</div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="mb-0.5 text-[11px] text-[#aaa]">슬라이드 {slide.id}</p>
+                    <p className="text-[13px] text-[#888]">{slide.subtitle}</p>
+                    <p className="text-[15px] font-black text-[#1a1a1a]">{slide.title.replace(/\n/g, " / ")}</p>
+                  </div>
                 </div>
                 <div className="flex shrink-0 gap-2">
                   <button onClick={() => setEditing({ ...slide })} className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45]">수정</button>
@@ -79,12 +86,36 @@ function SlideForm({ data, onChange, onSave, onCancel, saveLabel = "저장" }: {
   onCancel: () => void;
   saveLabel?: string;
 }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => onChange({ ...data, image: ev.target?.result as string });
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="space-y-3">
-      <Field label="이미지 경로">
-        <input value={data.image} onChange={(e) => onChange({ ...data, image: e.target.value })}
-          placeholder="/images/main/bg_hero_x.png"
-          className="h-10 w-full rounded-lg border border-[#e8e8e8] px-3 text-[13px] outline-none focus:border-[#c90f45]" />
+      <Field label="이미지">
+        <div
+          onClick={() => fileRef.current?.click()}
+          className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#e8e8e8] py-5 hover:border-[#c90f45] transition-colors"
+        >
+          {data.image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={data.image} alt="" className="max-h-32 w-full rounded-lg object-contain" />
+          ) : (
+            <>
+              <span className="text-[24px]">🖼</span>
+              <p className="text-[12px] text-[#aaa]">클릭해서 이미지 업로드</p>
+            </>
+          )}
+          {data.image && <p className="text-[11px] text-[#aaa]">클릭해서 이미지 변경</p>}
+        </div>
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+        <p className="mt-1.5 text-[11px] text-[#bbb]">권장 크기: 1920×1080px 이상 · 최대 1MB (JPG, PNG, WebP)</p>
       </Field>
       <Field label="부제목">
         <input value={data.subtitle} onChange={(e) => onChange({ ...data, subtitle: e.target.value })}

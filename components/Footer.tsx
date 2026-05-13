@@ -91,7 +91,7 @@ export default function Footer() {
       <footer className="border-t border-[#efefef] bg-white py-8">
         <div className="mx-auto max-w-270 px-5 text-center">
           <div className="mb-4 flex items-center justify-center">
-            <Image src="/images/logo.png" alt="LG전자 BEST SHOP" width={140} height={35} style={{ height: "auto" }} />
+            <Image src="/images/logo.png" alt="LG전자 BEST SHOP" width={140} height={35} />
           </div>
 
           <nav className="mb-4 flex items-center justify-center gap-4">

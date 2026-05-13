@@ -107,7 +107,7 @@ export default function AdminPage() {
         {/* 로고 */}
         <div className={`flex items-center border-b border-white/10 px-4 py-4 ${collapsed ? "justify-end" : "justify-between"}`}>
           {!collapsed && (
-            <Image src="/images/logo_white.png" alt="LG전자 BEST SHOP" width={120} height={30} style={{ height: "auto" }} />
+            <Image src="/images/logo_white.png" alt="LG전자 BEST SHOP" width={120} height={30} />
           )}
           <button
             onClick={() => setCollapsed((v) => !v)}
