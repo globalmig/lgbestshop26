@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 type ModalType = "privacy" | "terms" | null;
@@ -78,20 +80,18 @@ const TERMS = {
 };
 
 export default function Footer() {
+  const pathname = usePathname();
   const [modal, setModal] = useState<ModalType>(null);
+
+  if (pathname.startsWith("/lgbs-7x4q2")) return null;
   const data = modal === "privacy" ? PRIVACY : modal === "terms" ? TERMS : null;
 
   return (
     <>
       <footer className="border-t border-[#efefef] bg-white py-8">
         <div className="mx-auto max-w-270 px-5 text-center">
-          <div className="mb-4 flex items-center justify-center gap-2">
-            <span className="flex h-5.5 w-5.5 items-center justify-center rounded-full bg-[#c90f45] text-[10px] font-black leading-none text-white">
-              LG
-            </span>
-            <span className="text-[18px] font-bold tracking-[-0.02em] text-[#6c6c6c]">LG전자</span>
-            <span className="h-4 w-px bg-[#9b9b9b]" />
-            <span className="text-[18px] font-bold tracking-[-0.02em] text-[#6c6c6c]">BEST SHOP</span>
+          <div className="mb-4 flex items-center justify-center">
+            <Image src="/images/logo.png" alt="LG전자 BEST SHOP" width={140} height={35} style={{ height: "auto" }} />
           </div>
 
           <nav className="mb-4 flex items-center justify-center gap-4">

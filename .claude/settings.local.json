@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:www.lge.co.kr)"
+      "WebFetch(domain:www.lge.co.kr)",
+      "Bash(findstr -i \"chart\\\\|recharts\\\\|victory\\\\|d3\\\\|nivo\")"
     ]
   }
 }

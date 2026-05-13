@@ -3,6 +3,7 @@ import HeroSlider from "@/components/HeroSlider";
 import Benefit from "@/components/Benefit";
 import BlogSection from "@/components/BlogSection";
 import { getNaverBlogPosts } from "@/lib/naverBlog";
+import ManagerSection from "@/components/ManagerSection";
 
 const quickLinks = [
   {
@@ -32,24 +33,6 @@ const quickLinks = [
   },
 ];
 
-const managers = [
-  {
-    img: "/images/main/bestWorker01.png",
-    name: "이원표 지점장",
-    store: "용산전자상가점",
-    tags: ["구독 전문", "진철", "혼수 & 이사 전문"],
-    desc: "현실적인 컨설팅",
-    href: "https://map.naver.com/p/search/lg%EB%B2%A0%EC%8A%A4%ED%8A%B8%EC%83%B5%20%EC%9A%A9%EC%82%B0%EC%A0%90/place/33706664?placePath=/ticket?bk_query=lg%EB%B2%A0%EC%8A%A4%ED%8A%B8%EC%83%B5%20%EC%9A%A9%EC%82%B0%EC%A0%90&fromNxList=true&fromPanelNum=2&timestamp=202605131002&locale=ko&svcName=map_pcv5&searchText=lg%EB%B2%A0%EC%8A%A4%ED%8A%B8%EC%83%B5%20%EC%9A%A9%EC%82%B0%EC%A0%90&type=list&fromNxList=true&fromPanelNum=2&timestamp=202605131002&locale=ko&svcName=map_pcv5&searchText=lg%EB%B2%A0%EC%8A%A4%ED%8A%B8%EC%83%B5%20%EC%9A%A9%EC%82%B0%EC%A0%90&type=list&from=map&searchType=place&c=15.00,0,0,0,dh",
-  },
-  {
-    img: "/images/main/bestWorker02.png",
-    name: "장수석 부장님",
-    store: "용산전자상가점",
-    tags: ["구독전문", "진철", "혼수 패키지"],
-    desc: "꼼꼼한 설명",
-    href: "https://map.naver.com/p/search/lg%EB%B2%A0%EC%8A%A4%ED%8A%B8%EC%83%B5%20%EC%9A%A9%EC%82%B0%EC%A0%90/place/33706664?placePath=/ticket?bk_query=lg%EB%B2%A0%EC%8A%A4%ED%8A%B8%EC%83%B5%20%EC%9A%A9%EC%82%B0%EC%A0%90&fromNxList=true&fromPanelNum=2&timestamp=202605131002&locale=ko&svcName=map_pcv5&searchText=lg%EB%B2%A0%EC%8A%A4%ED%8A%B8%EC%83%B5%20%EC%9A%A9%EC%82%B0%EC%A0%90&type=list&fromNxList=true&fromPanelNum=2&timestamp=202605131002&locale=ko&svcName=map_pcv5&searchText=lg%EB%B2%A0%EC%8A%A4%ED%8A%B8%EC%83%B5%20%EC%9A%A9%EC%82%B0%EC%A0%90&type=list&from=map&searchType=place&c=15.00,0,0,0,dh",
-  },
-];
 
 export default async function Home() {
   const blogPosts = await getNaverBlogPosts("lg_yongsan");
@@ -90,38 +73,7 @@ export default async function Home() {
         {/* 혜택 소개 */}
         <Benefit bg="/images/main/bg_benefit.png" />
 
-        <section className="bg-white py-20">
-          <div className="mx-auto max-w-[1440px] w-full px-5">
-            <div className="mb-12 text-center">
-              <p className="mb-3 text-[13px] font-medium tracking-[0.08em] text-[#c90f45]">용산점 직원을 소개합니다</p>
-              <h2 className="mb-3 text-[34px] font-black tracking-[-0.05em] text-[#1a1a1a]">매니저 리뷰 어워드</h2>
-              <p className="text-[14px] text-[#888]">고객 리뷰를 바탕으로 선정된 MVP 매니저를 소개합니다.</p>
-            </div>
-
-            <div className="flex flex-col md:flex-row justify-center items-center  gap-6">
-              {managers.map((m) => (
-                <a key={m.name} href={m.href} className="group flex w-full max-w-90 flex-col items-center rounded-2xl bg-[#fdf3f5] px-10 py-10 transition-shadow hover:shadow-md">
-                  <div className="mb-5 h-[140px] w-[140px] overflow-hidden rounded-full bg-[#f0dde2]">
-                    <Image src={m.img} alt={m.name} width={140} height={140} className="h-full w-full object-cover object-top" />
-                  </div>
-                  <p className="mb-1 text-[20px] font-black tracking-[-0.04em] text-[#1a1a1a]">{m.name}</p>
-                  <p className="mb-5 text-[13px] text-[#aaa]">{m.store}</p>
-                  <div className="mb-4 flex flex-wrap justify-center gap-2">
-                    {m.tags.map((tag, i) => (
-                      <span key={tag} className={`rounded-full px-3 py-1 text-[12px] font-medium ${i === 0 ? "border border-[#c90f45] text-[#c90f45]" : "bg-white text-[#555]"}`}>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="mb-6 text-[13px] text-[#666]">{m.desc}</p>
-                  <span className="flex h-10 w-full items-center justify-center rounded-full bg-[#c90f45] text-[13px] font-bold text-white transition-opacity group-hover:opacity-90">
-                    예약 상담 신청
-                  </span>
-                </a>
-              ))}
-            </div>
-          </div>
-        </section>
+        <ManagerSection />
 
         <BlogSection posts={blogPosts} moreHref="https://blog.naver.com/lg_yongsan" />
       </main>

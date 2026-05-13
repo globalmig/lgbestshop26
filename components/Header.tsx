@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -15,15 +16,14 @@ export default function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
+  if (pathname.startsWith("/lgbs-7x4q2")) return null;
+
   return (
     <>
       <header className="sticky top-0 z-30 h-11 border-b py-8 border-[#e8e8e8] bg-white">
         <div className="mx-auto flex h-full max-w-[940px] items-center justify-between px-5">
-          <Link href="/" className="flex items-center gap-2" aria-label="LG전자 BEST SHOP 홈">
-            <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-[#c90f45] text-[10px] font-black leading-none text-white">LG</span>
-            <span className="text-[21px] font-bold tracking-[-0.02em] text-[#6c6c6c]">LG전자</span>
-            <span className="h-4 w-px bg-[#9b9b9b]" />
-            <span className="text-[21px] font-bold tracking-[-0.02em] text-[#6c6c6c]">BEST SHOP</span>
+          <Link href="/" aria-label="LG전자 BEST SHOP 홈">
+            <Image src="/images/logo.png" alt="LG전자 BEST SHOP" width={160} height={40} style={{ height: "auto" }} priority />
           </Link>
 
           <nav className="hidden h-full items-center gap-9 md:flex" aria-label="주요 메뉴">

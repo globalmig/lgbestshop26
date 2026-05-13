@@ -2,14 +2,19 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { slides } from "@/data/slides";
-
+import { slides as defaultSlides } from "@/data/slides";
+import { adminStore, type Slide } from "@/lib/adminStore";
 
 export default function HeroSlider() {
+  const [slides, setSlides] = useState<Slide[]>(defaultSlides);
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const total = slides.length;
+
+  useEffect(() => {
+    setSlides(adminStore.slides.get());
+  }, []);
 
   const startTimer = () => {
     timerRef.current = setInterval(() => {
