@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
-import ConsultBanner from "@/components/ConsultBanner";
+import ConditionalLayout from "@/components/ConditionalLayout";
 
 export const metadata: Metadata = {
   title: "LG전자 BEST SHOP",
@@ -27,8 +27,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <Header />
         {children}
-        {/* 상담 문의 공통 섹션 */}
-        <ConsultBanner />
+        <ConditionalLayout />
         <Footer />
       </body>
     </html>

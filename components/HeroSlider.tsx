@@ -4,12 +4,6 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { slides } from "@/data/slides";
 
-const floatingButtons = [
-  { src: "/images/main/btn/reservation-1.png", alt: "상담 신청", size: 64 },
-  { src: "/images/main/btn/kakaotalk.png", alt: "카카오톡 상담", size: 56 },
-  { src: "/images/main/btn/insta.png", alt: "인스타그램", size: 56 },
-  { src: "/images/main/btn/blog.png", alt: "블로그", size: 56 },
-];
 
 export default function HeroSlider() {
   const [current, setCurrent] = useState(0);
@@ -107,20 +101,6 @@ export default function HeroSlider() {
         >
           {paused ? "▶" : "Ⅱ"}
         </button>
-      </div>
-
-      <div className="absolute right-[7.2%] top-[430px] z-20 hidden flex-col items-center gap-3 lg:flex">
-        {floatingButtons.map((btn) => (
-          <a href="#consult" key={btn.alt} aria-label={btn.alt}>
-            <Image
-              src={btn.src}
-              alt={btn.alt}
-              width={btn.size}
-              height={btn.size}
-              className="drop-shadow-sm"
-            />
-          </a>
-        ))}
       </div>
     </section>
   );
