@@ -17,8 +17,8 @@ export default function ManagerSection() {
     <section className="bg-white py-20">
       <div className="mx-auto w-full max-w-[1440px] px-5">
         <div className="mb-12 text-center">
-          <p className="mb-3 text-[13px] font-medium tracking-[0.08em] text-[#c90f45]">용산점 직원을 소개합니다</p>
-          <h2 className="mb-3 text-[34px] font-black tracking-[-0.05em] text-[#1a1a1a]">매니저 리뷰 어워드</h2>
+          <p className="mb-3 text-[13px] font-medium tracking-[0.08em] text-[#c90f45]">용산전자상가점 매니저를 소개합니다</p>
+          <h2 className="mb-3 text-[34px] font-black tracking-[-0.05em] text-[#1a1a1a]">상담 매니저</h2>
           <p className="text-[14px] text-[#888]">고객 리뷰를 바탕으로 선정된 MVP 매니저를 소개합니다.</p>
         </div>
 

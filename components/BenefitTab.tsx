@@ -250,12 +250,12 @@ export default function BenefitTab() {
 
         <div className="grid grid-cols-2 gap-4 pt-12">
           <MembershipCard />
-          <a href="#" className="flex items-center justify-center rounded-2xl bg-[#c90f45] p-6 text-center" style={{ boxShadow: "0 8px 28px rgba(255, 204, 218, 0.89)" }}>
-            <span className="text-[28px] font-black leading-[1.4] text-white">
-              구독 제품
-              <br />
-              보러 가기
-            </span>
+          <a
+            href="https://docs.google.com/forms/d/1eE__jHrr2ywkEuFu0G18wEFIdKqUt9AUdbsGv6k94sY/edit"
+            className="flex items-center justify-center rounded-2xl bg-[#c90f45] p-6 text-center"
+            style={{ boxShadow: "0 8px 28px rgba(255, 204, 218, 0.89)" }}
+          >
+            <span className="text-[28px] font-black leading-[1.4] text-white">상담 신청!</span>
           </a>
         </div>
       </div>

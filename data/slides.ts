@@ -3,14 +3,16 @@ export type Slide = {
   image: string;
   subtitle: string;
   title: string;
+  description?: string;
 };
 
 export const slides: Slide[] = [
   {
     id: 1,
     image: "/images/main/bg_hero_1.png",
-    subtitle: "모르는 사람은 받을 수 없는",
-    title: "용산전자에서\n받아가세요!",
+    subtitle: "바쁘신 고객님을 위한",
+    title: "1:1 비대면\n프리미엄 가전 상담",
+    description: "원하는 시간에, 원하는 장소에서 편안하게\n맞춤형 가전 견적을 받아보세요.",
   },
   {
     id: 2,

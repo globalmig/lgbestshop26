@@ -80,6 +80,11 @@ export default function HeroSlider() {
           <h1 className="whitespace-pre-line text-[56px] font-black leading-[1.12] tracking-[-0.07em]">
             {slide.title}
           </h1>
+          {slide.description && (
+            <p className="mt-5 whitespace-pre-line text-[18px] font-medium leading-relaxed tracking-[-0.03em] opacity-80">
+              {slide.description}
+            </p>
+          )}
         </div>
       </div>
 
