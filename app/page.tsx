@@ -23,13 +23,13 @@ const quickLinks = [
     icon: "/images/icon/benefit.png",
     title: "혜택 & 이달의 소식",
     description: "최신 프로모션 & 이벤트",
-    href: "#",
+    href: "/benefit",
   },
   {
     icon: "/images/icon/smallBusiness.png",
     title: "소상공인",
     description: "기업 · 사업자 전용 혜택",
-    href: "#",
+    href: "/sme",
   },
 ];
 

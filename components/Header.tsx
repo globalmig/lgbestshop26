@@ -8,8 +8,8 @@ import { useState } from "react";
 const navItems = [
   { label: "HOME", href: "/" },
   { label: "가전구독", href: "/subscription" },
-  { label: "혜택&이달의 소식", href: "#" },
-  { label: "소상공인", href: "#" },
+  { label: "혜택&이달의 소식", href: "/benefit" },
+  { label: "소상공인", href: "/sme" },
 ];
 
 export default function Header() {
