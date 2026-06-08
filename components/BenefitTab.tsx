@@ -118,19 +118,19 @@ function BenefitCard({ item }: { item: BenefitItem }) {
 
   return (
     <div
-      className="relative rounded-2xl p-6 pt-4"
+      className="relative rounded-2xl p-5 pt-4 sm:p-6 sm:pt-4"
       style={{
         background: "linear-gradient(135deg, #ffffff 40%, #FFF0F3 100%)",
         boxShadow: "2px 3px 12px #FFCED8",
       }}
     >
-      <div className="animate-float absolute -right-3 -top-20" style={{ animationDelay: `${(item.id - 1) * 0.4}s` }}>
-        <Image src={item.icon} alt="" width={170} height={170} />
+      <div className="animate-float absolute -right-2 -top-14 sm:-right-3 sm:-top-20" style={{ animationDelay: `${(item.id - 1) * 0.4}s` }}>
+        <Image src={item.icon} alt="" width={170} height={170} className="w-20 sm:w-28 lg:w-42.5" />
       </div>
 
       <span className="inline-flex w-fit rounded-full bg-[#c90f45] px-3 py-1 text-[11px] font-bold text-white">{item.badge}</span>
 
-      <h3 className="mb-4 mt-3 text-[22px] font-black leading-[1.3] tracking-[-0.04em] text-[#1a1a1a]">{item.title}</h3>
+      <h3 className="mb-3 mt-2 text-[17px] font-black leading-[1.3] tracking-[-0.04em] text-[#1a1a1a] sm:mb-4 sm:mt-3 sm:text-[19px] md:text-[22px]">{item.title}</h3>
 
       <div className="border-t border-[#f0c0cc] pt-4">
         <p className="mb-1 text-[12px] font-bold text-[#c90f45]">할인조건</p>
@@ -180,13 +180,13 @@ function MembershipCard() {
         boxShadow: "2px 3px 12px #FFCED8",
       }}
     >
-      <div className="animate-float absolute -right-3 -top-20" style={{ animationDelay: "0.2s" }}>
-        <Image src="/images/icon/3D/coin.png" alt="" width={170} height={170} />
+      <div className="animate-float absolute -right-2 -top-14 sm:-right-3 sm:-top-20" style={{ animationDelay: "0.2s" }}>
+        <Image src="/images/icon/3D/coin.png" alt="" width={170} height={170} className="w-20 sm:w-28 lg:w-42.5" />
       </div>
 
       <span className="inline-flex w-fit rounded-full bg-[#ff6b00] px-3 py-1 text-[11px] font-bold text-white">최대 30만 포인트</span>
 
-      <h3 className="mb-4 mt-3 text-[22px] font-black leading-[1.3] tracking-[-0.04em] text-[#1a1a1a]">
+      <h3 className="mb-3 mt-2 text-[17px] font-black leading-[1.3] tracking-[-0.04em] text-[#1a1a1a] sm:mb-4 sm:mt-3 sm:text-[19px] md:text-[22px]">
         LG전자 멤버십
         <br />
         포인트
@@ -229,33 +229,32 @@ function MembershipCard() {
 
 export default function BenefitTab() {
   return (
-    <section className="relative overflow-hidden py-16">
+    <section className="relative overflow-hidden py-10 md:py-16">
       <Image src="/images/bg_white_benefit.png" alt="" fill sizes="100vw" className="object-cover object-center" />
-      <div className="relative z-10 mx-auto max-w-[1080px] px-5">
-        <div className="mb-16 text-center">
-          <p className="mb-3 text-[13px] font-medium text-[#c90f45]">더 많은 구독료 혜택을 받을 수 있나요?</p>
-          <h2 className="text-[32px] font-black leading-[1.35] tracking-[-0.05em] text-[#1a1a1a]">
+      <div className="relative z-10 mx-auto max-w-[1080px] px-4 sm:px-5">
+        <div className="mb-10 text-center md:mb-16">
+          <p className="mb-2 text-[11px] font-medium text-[#c90f45] sm:text-[13px]">더 많은 구독료 혜택을 받을 수 있나요?</p>
+          <h2 className="text-[20px] font-black leading-[1.35] tracking-[-0.05em] text-[#1a1a1a] sm:text-[26px] md:text-[32px]">
             고객님의 조건에 적합한
             <br />
             다양한 혜택을 안내드립니다
           </h2>
         </div>
 
-        {/* 카드 그리드 — 아이콘 overflow 공간 확보 위해 pt-12 */}
-        <div className="mb-16 grid grid-cols-3 gap-x-4 gap-y-16 pt-12">
+        <div className="mb-10 grid grid-cols-1 gap-x-4 gap-y-14 pt-10 sm:grid-cols-2 sm:gap-y-16 sm:pt-12 lg:grid-cols-3 md:mb-16">
           {items.map((item) => (
             <BenefitCard key={item.id} item={item} />
           ))}
         </div>
 
-        <div className="grid grid-cols-2 gap-4 pt-12">
+        <div className="grid grid-cols-1 gap-4 pt-10 sm:grid-cols-2 sm:pt-12">
           <MembershipCard />
           <a
             href="https://docs.google.com/forms/d/1eE__jHrr2ywkEuFu0G18wEFIdKqUt9AUdbsGv6k94sY/edit"
-            className="flex items-center justify-center rounded-2xl bg-[#c90f45] p-6 text-center"
+            className="flex min-h-40 items-center justify-center rounded-2xl bg-[#c90f45] p-6 text-center"
             style={{ boxShadow: "0 8px 28px rgba(255, 204, 218, 0.89)" }}
           >
-            <span className="text-[28px] font-black leading-[1.4] text-white">상담 신청!</span>
+            <span className="text-[22px] font-black leading-[1.4] text-white sm:text-[24px] md:text-[28px]">상담 신청!</span>
           </a>
         </div>
       </div>

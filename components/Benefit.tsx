@@ -15,24 +15,24 @@ interface BenefitProps {
 
 export default function Benefit({ bg }: BenefitProps) {
   return (
-    <section className="relative overflow-hidden py-20">
+    <section className="relative overflow-hidden py-10 md:py-20">
       <Image src={bg} alt="" fill sizes="100vw" className="object-cover object-center" />
-      <div className="relative z-10 mx-auto max-w-[1440px] px-5">
-        <div className="mb-12 text-center">
-          <p className="mb-3 text-[13px] font-medium text-[#c90f45]">가전 구독하면 무엇이 좋은가요?</p>
-          <h2 className="text-[30px] font-black leading-[1.3] tracking-[-0.05em] text-[#1a1a1a]">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-4 sm:px-5">
+        <div className="mb-8 text-center md:mb-12">
+          <p className="mb-2 text-[11px] font-medium text-[#c90f45] sm:text-[13px]">가전 구독하면 무엇이 좋은가요?</p>
+          <h2 className="text-[18px] font-black leading-[1.3] tracking-[-0.05em] text-[#1a1a1a] sm:text-[22px] md:text-[26px] lg:text-[30px]">
             일시불과 차이없는 가격!
             <br />
             부담은 지우고 전문가의 빈틈없는 케어를 남겨드립니다.
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
           {benefits.map((item, i) => (
-            <div key={i} className="flex items-center justify-between rounded-2xl bg-white px-8 py-8 shadow-sm">
-              <p className="whitespace-pre-line h-full text-[2rem] pb-10 font-black leading-[1.35] tracking-[-0.04em] text-[#5E4242]">{item.text}</p>
-              <div className="h-full pt-20">
-                <Image src={item.icon} alt="" width={160} height={138} className="shrink-0" />
+            <div key={i} className="flex min-h-[140px] flex-col justify-between overflow-hidden rounded-2xl bg-white px-5 pt-5 shadow-sm sm:min-h-[160px] sm:px-6 sm:pt-6 md:min-h-[190px] md:px-8 md:pt-7">
+              <p className="whitespace-pre-line text-[1rem] font-black leading-[1.35] tracking-[-0.04em] text-[#5E4242] sm:text-[1.15rem] md:text-[1.4rem] lg:text-[1.7rem]">{item.text}</p>
+              <div className="flex justify-end">
+                <Image src={item.icon} alt="" width={160} height={138} className="h-auto w-14 sm:w-20 md:w-24 lg:w-32" />
               </div>
             </div>
           ))}

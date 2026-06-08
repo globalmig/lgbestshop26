@@ -563,7 +563,7 @@ function CoinIcon() {
 
 function CardVisual({ card, size = "lg" }: { card: CardData; size?: "sm" | "lg" }) {
   const isLg = size === "lg";
-  return <Image src={card.image} alt={card.company} width={isLg ? 200 : 90} height={isLg ? 320 : 144} className={`rounded-xl shadow-md ${isLg ? "w-50" : "w-[90px]"}`} style={{ height: "auto" }} />;
+  return <Image src={card.image} alt={card.company} width={isLg ? 200 : 90} height={isLg ? 320 : 144} className={`rounded-xl shadow-md ${isLg ? "w-28 sm:w-36 md:w-50" : "w-22.5"}`} style={{ height: "auto" }} />;
 }
 
 export default function CardTab() {
@@ -574,17 +574,17 @@ export default function CardTab() {
   const active = cards.find((c) => c.id === activeId)!;
 
   return (
-    <section className="bg-white py-16">
-      <div className="mx-auto w-full max-w-[1440px]  px-5">
+    <section className="bg-white py-8 md:py-16">
+      <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-5">
         {/* Header */}
-        <div className="mb-10 text-center">
-          <p className="mb-3 text-[13px] font-medium text-[#c90f45]">제휴 카드 혜택도 있나요?</p>
-          <h2 className="mb-4 text-[32px] font-black leading-[1.35] tracking-tighter text-[#1a1a1a]">
+        <div className="mb-6 text-center md:mb-10">
+          <p className="mb-2 text-[11px] font-medium text-[#c90f45] sm:text-[13px]">제휴 카드 혜택도 있나요?</p>
+          <h2 className="mb-3 text-[20px] font-black leading-[1.35] tracking-tighter text-[#1a1a1a] sm:text-[26px] md:text-[32px]">
             다양한 제휴카드로 월 구독료 할인을
             <br />
             받을 수 있습니다
           </h2>
-          <p className="text-[14px] leading-[1.7] text-[#c90f45]">전월 실적에 따라 월 1회 할인이 적용되며, 다른 가전 추가 구독 시 다른 카드사의 제휴카드를 이용해야만 할인이 적용됩니다.</p>
+          <p className="text-[12px] leading-[1.7] text-[#c90f45] sm:text-[13px] md:text-[14px]">전월 실적에 따라 월 1회 할인이 적용되며, 다른 가전 추가 구독 시 다른 카드사의 제휴카드를 이용해야만 할인이 적용됩니다.</p>
         </div>
 
         {/* Card Tab Selector */}
@@ -624,16 +624,13 @@ export default function CardTab() {
         </div>
 
         {/* Selected Card Detail */}
-        <div className="mb-0 rounded-t-2xl border border-b-0 border-[#e8e8e8] bg-white ">
-          <div className="p-8">
-            <h3 className="mb-8 text-[22px] font-black tracking-[-0.04em] text-[#1a1a1a]">{active.fullName}</h3>
-            <div className="flex gap-20">
+        <div className="mb-0 rounded-t-2xl border border-b-0 border-[#e8e8e8] bg-white">
+          <div className="p-4 sm:p-6 md:p-8">
+            <h3 className="mb-5 text-[16px] font-black tracking-[-0.04em] text-[#1a1a1a] sm:text-[19px] md:mb-8 md:text-[22px]">{active.fullName}</h3>
+            <div className="flex flex-col gap-5 sm:flex-row sm:gap-10 md:gap-20">
               {/* Left: card image */}
-              <div className="flex shrink-0 flex-col items-center gap-3 ">
+              <div className="flex shrink-0 flex-row items-center gap-4 sm:flex-col sm:items-center sm:gap-3">
                 <CardVisual card={active} size="lg" />
-                <button type="button" className="text-[13px] text-[#555] hover:text-[#1a1a1a]">
-                  카드 정보 자세히 보기 &gt;
-                </button>
               </div>
 
               {/* Right: tiers */}
@@ -697,7 +694,7 @@ export default function CardTab() {
           </button>
 
           {detailOpen && (
-            <div className="border-t border-[#e8e8e8] px-8 py-6">
+            <div className="border-t border-[#e8e8e8] px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6">
               {/* Info rows */}
               <div className="mb-6 space-y-2">
                 {active.detail.features && active.detail.features.length > 0 && (
@@ -902,7 +899,7 @@ export default function CardTab() {
           </button>
 
           {notesOpen && (
-            <div className="border-t border-[#e8e8e8] px-8 py-6">
+            <div className="border-t border-[#e8e8e8] px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6">
               <ul className="space-y-2">
                 {active.notes.map((note, i) => (
                   <li key={i} className="flex gap-2 text-[13px] leading-[1.7] text-[#555]">

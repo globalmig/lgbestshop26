@@ -15,7 +15,7 @@ export default async function SubscriptionPage({ searchParams }: { searchParams:
 
   return (
     <>
-      <section className="relative h-[720px]">
+      <section className="relative h-75 sm:h-105 md:h-140 lg:h-180">
         <video src="https://static.lge.co.kr/kr/caresolutions/images/care-service-kv-pc.mp4" autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover object-center" />
       </section>
 

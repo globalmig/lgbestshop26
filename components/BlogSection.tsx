@@ -13,15 +13,16 @@ interface Props {
 
 export default function BlogSection({ posts, moreHref = "#" }: Props) {
   return (
-    <section className="bg-white py-20">
+    <section className="bg-white py-12 sm:py-16 md:py-20">
       <div className="mx-auto max-w-[1440px] px-5">
-        <div className="mb-10 text-center">
-          <p className="mb-3 text-[13px] font-medium text-[#c90f45]">용산전자상가점 blog</p>
-          <h2 className="mb-2 text-[34px] font-black tracking-[-0.05em] text-[#1a1a1a]">
-            가전 케어 및 관리 방법과 <br />
-            다양한 가전 정보를 확인해보세요
+        <div className="mb-8 text-center sm:mb-10">
+          <p className="mb-3 text-[12px] font-medium text-[#c90f45] sm:text-[13px]">용산전자상가점 blog</p>
+          <h2 className="mb-2 text-[20px] font-black leading-[1.3] tracking-[-0.05em] text-[#1a1a1a] sm:text-[26px] md:text-[34px]">
+            가전 케어 및 관리 방법과
+            <br className="hidden sm:block" />
+            {" "}다양한 가전 정보를 확인해보세요
           </h2>
-          <p className="text-[14px] text-[#888]">업데이트 내용을 확인해보세요</p>
+          <p className="text-[13px] text-[#888] sm:text-[14px]">업데이트 내용을 확인해보세요</p>
         </div>
 
         <div className="mb-8 grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-5">
