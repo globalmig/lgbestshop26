@@ -32,11 +32,6 @@ export default function AdminPage() {
   const [stats, setStats] = useState({ consult: 0, newConsult: 0, slides: 0, managers: 0 });
   const [consultList, setConsultList] = useState<{ status: string; submittedAt: string }[]>([]);
 
-  useEffect(() => {
-    if (authed) loadStats();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authed]);
-
   const loadStats = async () => {
     const [consult, slides, managers] = await Promise.all([
       fetch("/api/consult").then((r) => r.json()),
@@ -51,6 +46,10 @@ export default function AdminPage() {
       managers: managers.length,
     });
   };
+
+  useEffect(() => {
+    if (authed) loadStats();
+  }, [authed]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = async () => {
     const res = await fetch("/lgbs-7x4q2/auth", {

@@ -25,7 +25,7 @@ export default function HeroSlider({ initialSlides = [] }: { initialSlides?: Sli
         setCurrent(0);
       });
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const startTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);

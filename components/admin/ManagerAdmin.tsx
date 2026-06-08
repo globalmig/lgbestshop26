@@ -145,9 +145,9 @@ function ImgUpload({ value, onChange }: { value: string; onChange: (v: string) =
 
   return (
     <div className="flex items-center gap-4">
-      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-[#f5f5f5]">
+      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-[#f5f5f5]">
         {value
-          ? <img src={value} alt="" className="h-full w-full object-cover object-top" />
+          ? <Image src={value} alt="" fill className="object-cover object-top" unoptimized />
           : <span className="flex h-full w-full items-center justify-center text-[22px]">👤</span>
         }
       </div>
