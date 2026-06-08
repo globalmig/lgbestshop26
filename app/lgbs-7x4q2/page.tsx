@@ -48,8 +48,8 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
-    if (authed) loadStats();
-  }, [authed]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (authed) loadStats(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [authed]);
 
   const login = async () => {
     const res = await fetch("/lgbs-7x4q2/auth", {
