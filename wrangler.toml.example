@@ -1,0 +1,12 @@
+name = "lgbestshop26"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "lgbestshop_db"
+database_name = "YOUR_DB_NAME"
+database_id = "YOUR_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "lgbestshop_storage"
+bucket_name = "YOUR_BUCKET_NAME"
