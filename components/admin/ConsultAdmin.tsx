@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { adminStore, type ConsultSubmission } from "@/lib/adminStore";
+import { useEffect, useState } from "react";
+import type { ConsultSubmission } from "@/lib/adminStore";
 
 const STATUS = {
   new: { label: "신규", cls: "bg-blue-50 text-blue-600 border-blue-200" },
@@ -10,21 +10,27 @@ const STATUS = {
 } as const;
 
 export default function ConsultAdmin() {
-  const [submissions, setSubmissions] = useState<ConsultSubmission[]>(() => adminStore.consult.get());
+  const [submissions, setSubmissions] = useState<ConsultSubmission[]>([]);
   const [selected, setSelected] = useState<ConsultSubmission | null>(null);
 
-  const updateStatus = (id: string, status: ConsultSubmission["status"]) => {
-    const updated = submissions.map((s) => (s.id === id ? { ...s, status } : s));
-    setSubmissions(updated);
-    adminStore.consult.set(updated);
+  useEffect(() => {
+    fetch("/api/consult").then((r) => r.json()).then(setSubmissions);
+  }, []);
+
+  const updateStatus = async (id: string, status: ConsultSubmission["status"]) => {
+    await fetch(`/api/consult/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    setSubmissions((prev) => prev.map((s) => (s.id === id ? { ...s, status } : s)));
     if (selected?.id === id) setSelected((prev) => prev && { ...prev, status });
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!confirm("삭제하시겠습니까?")) return;
-    const updated = submissions.filter((s) => s.id !== id);
-    setSubmissions(updated);
-    adminStore.consult.set(updated);
+    await fetch(`/api/consult/${id}`, { method: "DELETE" });
+    setSubmissions((prev) => prev.filter((s) => s.id !== id));
     if (selected?.id === id) setSelected(null);
   };
 

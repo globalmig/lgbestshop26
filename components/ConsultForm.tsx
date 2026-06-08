@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { adminStore } from "@/lib/adminStore";
 import Link from "next/link";
 
 const PRIVACY_CONTENT = `1. 수집하는 개인정보 항목
@@ -56,19 +55,22 @@ export default function ConsultForm() {
     setFileName(file.name);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    adminStore.consult.add({
-      id: Date.now().toString(),
-      name: nameRef.current?.value ?? "",
-      phone: phoneRef.current?.value ?? "",
-      purpose: purpose === "기타" ? purposeEtc : purpose,
-      area: areaRef.current?.value ?? "",
-      apartment: apartment === "네" ? `네 (${apartmentName})` : apartment,
-      channels,
-      model: modelRef.current?.value ?? "",
-      submittedAt: new Date().toISOString(),
-      status: "new",
+    await fetch("/api/consult", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: Date.now().toString(),
+        name: nameRef.current?.value ?? "",
+        phone: phoneRef.current?.value ?? "",
+        purpose: purpose === "기타" ? purposeEtc : purpose,
+        area: areaRef.current?.value ?? "",
+        apartment: apartment === "네" ? `네 (${apartmentName})` : apartment,
+        channels,
+        model: modelRef.current?.value ?? "",
+        submittedAt: new Date().toISOString(),
+      }),
     });
     setSubmitted(true);
   };
