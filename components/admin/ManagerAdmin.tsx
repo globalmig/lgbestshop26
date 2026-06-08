@@ -1,34 +1,48 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
-import { adminStore, type Manager } from "@/lib/adminStore";
+import { useEffect, useRef, useState } from "react";
+import type { Manager } from "@/lib/adminStore";
 
 const EMPTY: Omit<Manager, "id"> = { img: "", name: "", store: "용산전자상가점", tags: [], desc: "", href: "#" };
 
 export default function ManagerAdmin() {
-  const [managers, setManagers] = useState<Manager[]>(() => adminStore.managers.get());
+  const [managers, setManagers] = useState<Manager[]>([]);
   const [editing, setEditing] = useState<Manager | null>(null);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState<Omit<Manager, "id">>(EMPTY);
 
-  const persist = (updated: Manager[]) => { setManagers(updated); adminStore.managers.set(updated); };
+  useEffect(() => {
+    fetch("/api/managers").then((r) => r.json()).then(setManagers);
+  }, []);
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editing) return;
-    persist(managers.map((m) => (m.id === editing.id ? editing : m)));
+    await fetch(`/api/managers/${editing.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editing),
+    });
+    setManagers((prev) => prev.map((m) => (m.id === editing.id ? editing : m)));
     setEditing(null);
   };
 
-  const handleAdd = () => {
-    persist([...managers, { id: Date.now().toString(), ...form }]);
+  const handleAdd = async () => {
+    const newManager = { id: Date.now().toString(), ...form };
+    await fetch("/api/managers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newManager),
+    });
+    setManagers((prev) => [...prev, newManager]);
     setForm(EMPTY);
     setAdding(false);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!confirm("삭제하시겠습니까?")) return;
-    persist(managers.filter((m) => m.id !== id));
+    await fetch(`/api/managers/${id}`, { method: "DELETE" });
+    setManagers((prev) => prev.filter((m) => m.id !== id));
   };
 
   return (
@@ -115,13 +129,18 @@ function ManagerForm({ data, onChange }: { data: Omit<Manager, "id">; onChange: 
 
 function ImgUpload({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => onChange(ev.target?.result as string);
-    reader.readAsDataURL(file);
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    const { url } = await res.json();
+    onChange(url);
+    setUploading(false);
   };
 
   return (
@@ -133,9 +152,9 @@ function ImgUpload({ value, onChange }: { value: string; onChange: (v: string) =
         }
       </div>
       <div>
-        <button type="button" onClick={() => fileRef.current?.click()}
-          className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45]">
-          {value ? "이미지 변경" : "이미지 업로드"}
+        <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
+          className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45] disabled:opacity-50">
+          {uploading ? "업로드 중..." : value ? "이미지 변경" : "이미지 업로드"}
         </button>
         {value && (
           <button type="button" onClick={() => onChange("")} className="mt-1 text-[11px] text-[#bbb] hover:text-red-400">삭제</button>
