@@ -13,7 +13,10 @@ export default function HeroSlider({ initialSlides = [] }: { initialSlides?: Sli
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const total = slides.length;
   const totalRef = useRef(total);
-  totalRef.current = total;
+
+  useEffect(() => {
+    totalRef.current = total;
+  }, [total]);
 
   useEffect(() => {
     if (initialSlides.length === 0) {

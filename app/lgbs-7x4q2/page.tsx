@@ -19,7 +19,9 @@ const NAV = [
 type TabId = (typeof NAV)[number]["id"];
 
 export default function AdminPage() {
-  const [authed, setAuthed] = useState(false);
+  const [authed, setAuthed] = useState(() =>
+    typeof window !== "undefined" && sessionStorage.getItem("admin_auth") === "true"
+  );
   const [pw, setPw] = useState("");
   const [error, setError] = useState(false);
   const [tab, setTab] = useState<TabId>("dashboard");
@@ -31,11 +33,9 @@ export default function AdminPage() {
   const [consultList, setConsultList] = useState<{ status: string; submittedAt: string }[]>([]);
 
   useEffect(() => {
-    if (sessionStorage.getItem("admin_auth") === "true") {
-      setAuthed(true);
-      loadStats();
-    }
-  }, []);
+    if (authed) loadStats();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authed]);
 
   const loadStats = async () => {
     const [consult, slides, managers] = await Promise.all([
