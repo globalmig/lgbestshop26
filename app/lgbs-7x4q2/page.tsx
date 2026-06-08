@@ -6,7 +6,6 @@ import HeroAdmin from "@/components/admin/HeroAdmin";
 import ConsultAdmin from "@/components/admin/ConsultAdmin";
 import ManagerAdmin from "@/components/admin/ManagerAdmin";
 import PostAdmin from "@/components/admin/PostAdmin";
-import { adminStore } from "@/lib/adminStore";
 
 const NAV = [
   { id: "dashboard", label: "대시보드", icon: "⊞" },
@@ -29,6 +28,7 @@ export default function AdminPage() {
 
   // 대시보드 통계
   const [stats, setStats] = useState({ consult: 0, newConsult: 0, slides: 0, managers: 0 });
+  const [consultList, setConsultList] = useState<{ status: string; submittedAt: string }[]>([]);
 
   useEffect(() => {
     if (sessionStorage.getItem("admin_auth") === "true") {
@@ -37,13 +37,18 @@ export default function AdminPage() {
     }
   }, []);
 
-  const loadStats = () => {
-    const consult = adminStore.consult.get();
+  const loadStats = async () => {
+    const [consult, slides, managers] = await Promise.all([
+      fetch("/api/consult").then((r) => r.json()),
+      fetch("/api/slides").then((r) => r.json()),
+      fetch("/api/managers").then((r) => r.json()),
+    ]);
+    setConsultList(consult);
     setStats({
       consult: consult.length,
-      newConsult: consult.filter((c) => c.status === "new").length,
-      slides: adminStore.slides.get().length,
-      managers: adminStore.managers.get().length,
+      newConsult: consult.filter((c: { status: string }) => c.status === "new").length,
+      slides: slides.length,
+      managers: managers.length,
     });
   };
 
@@ -203,7 +208,7 @@ export default function AdminPage() {
               </div>
 
               {(() => {
-                const consult = adminStore.consult.get();
+                const consult = consultList;
                 const now = new Date();
                 const monthly = Array.from({ length: 12 }, (_, i) => {
                   const d = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1);
