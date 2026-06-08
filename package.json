@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "cf:build": "opennextjs-cloudflare build",
-    "cf:deploy": "opennextjs-cloudflare build && wrangler pages deploy"
+    "cf:deploy": "opennextjs-cloudflare build && wrangler deploy"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^4.20260608.1",

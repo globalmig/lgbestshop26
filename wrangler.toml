@@ -1,0 +1,14 @@
+name = "lgbestshop26"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+main = ".open-next/worker.js"
+assets = { directory = ".open-next/assets", binding = "ASSETS" }
+
+[[d1_databases]]
+binding = "lgbestshop_db"
+database_name = "lgbestshop-db"
+database_id = "3828beee-3f65-4e32-b2cc-c1633355f561"
+
+[[r2_buckets]]
+binding = "lgbestshop_storage"
+bucket_name = "lgbestshop-storage"
