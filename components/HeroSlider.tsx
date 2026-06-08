@@ -2,43 +2,59 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { slides as defaultSlides } from "@/data/slides";
-import { adminStore, type Slide } from "@/lib/adminStore";
+import type { Slide } from "@/data/slides";
 
-export default function HeroSlider() {
-  const [slides, setSlides] = useState<Slide[]>(defaultSlides);
+const nl = (s: string) => s.replace(/\\n/g, "\n");
+
+export default function HeroSlider({ initialSlides = [] }: { initialSlides?: Slide[] }) {
+  const [slides, setSlides] = useState<Slide[]>(initialSlides);
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const total = slides.length;
+  const totalRef = useRef(total);
+  totalRef.current = total;
 
   useEffect(() => {
-    setSlides(adminStore.slides.get());
+    if (initialSlides.length === 0) {
+      fetch("/api/slides").then((r) => r.json()).then((data) => {
+        setSlides(data);
+        setCurrent(0);
+      });
+    }
   }, []);
 
   const startTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % total);
+      setCurrent((prev) => {
+        const n = totalRef.current;
+        return n > 0 ? (prev + 1) % n : 0;
+      });
     }, 4000);
   };
 
   useEffect(() => {
+    if (slides.length === 0) return;
     if (!paused) startTimer();
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [paused]);
+  }, [paused, slides.length]);
 
   const go = (index: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
-    setCurrent((index + total) % total);
+    const n = totalRef.current;
+    setCurrent(n > 0 ? (index + n) % n : 0);
     if (!paused) startTimer();
   };
 
   const slide = slides[current];
 
+  if (!slide) return <div className="h-145 bg-[#f5f5f5]" />;
+
   return (
-    <section className="relative h-[580px] overflow-hidden">
+    <section className="relative h-[420px] overflow-hidden sm:h-[500px] md:h-[580px]">
       {slides.map((s, i) => (
         <div
           key={s.id}
@@ -55,34 +71,18 @@ export default function HeroSlider() {
         </div>
       ))}
 
-      <button
-        type="button"
-        onClick={() => go(current - 1)}
-        className="absolute left-8 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[24px] font-light text-[#888] shadow-sm"
-        aria-label="이전 배너"
-      >
-        ‹
-      </button>
-      <button
-        type="button"
-        onClick={() => go(current + 1)}
-        className="absolute right-8 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[24px] font-light text-[#888] shadow-sm"
-        aria-label="다음 배너"
-      >
-        ›
-      </button>
 
       <div className="relative z-10 mx-auto flex h-full max-w-[1080px] items-center px-5">
-        <div className="mb-10">
-          <p className="mb-4 text-[31px] font-medium tracking-[-0.05em]">
-            {slide.subtitle}
+        <div className="mb-6 sm:mb-10">
+          <p className="mb-2 text-[16px] font-medium tracking-[-0.05em] sm:mb-4 sm:text-[22px] md:text-[28px] lg:text-[31px]">
+            {nl(slide.subtitle)}
           </p>
-          <h1 className="whitespace-pre-line text-[56px] font-black leading-[1.12] tracking-[-0.07em]">
-            {slide.title}
+          <h1 className="whitespace-pre-line text-[28px] font-black leading-[1.12] tracking-[-0.07em] sm:text-[38px] md:text-[48px] lg:text-[56px]">
+            {nl(slide.title)}
           </h1>
           {slide.description && (
-            <p className="mt-5 whitespace-pre-line text-[18px] font-medium leading-relaxed tracking-[-0.03em] opacity-80">
-              {slide.description}
+            <p className="mt-3 whitespace-pre-line text-[13px] font-medium leading-relaxed tracking-[-0.03em] opacity-80 sm:mt-4 sm:text-[15px] md:text-[16px] lg:mt-5 lg:text-[18px]">
+              {nl(slide.description)}
             </p>
           )}
         </div>

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import HeroSlider from "@/components/HeroSlider";
+import HeroSliderClient from "@/components/HeroSliderClient";
 import Benefit from "@/components/Benefit";
 import BlogSection from "@/components/BlogSection";
 import { getNaverBlogPosts } from "@/lib/naverBlog";
@@ -35,12 +35,15 @@ const quickLinks = [
 
 
 export default async function Home() {
-  const blogPosts = await getNaverBlogPosts("lg_yongsan");
+  const [blogPosts, slidesRes] = await Promise.all([
+    getNaverBlogPosts("lg_yongsan"),
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000"}/api/slides`).then((r) => r.json()).catch(() => []),
+  ]);
 
   return (
     <>
       <main className="min-h-[calc(100vh-44px)] bg-white text-black">
-        <HeroSlider />
+        <HeroSliderClient initialSlides={slidesRes} />
 
         {/* 퀵메뉴 */}
         <section className="border-t border-[#f1f1f1] bg-white">

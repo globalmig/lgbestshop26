@@ -1,34 +1,49 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { adminStore, type Slide } from "@/lib/adminStore";
+import { useEffect, useRef, useState } from "react";
+import type { Slide } from "@/lib/adminStore";
 
-const EMPTY = { image: "", subtitle: "", title: "" };
+const EMPTY = { image: "", subtitle: "", title: "", description: "" };
 
 export default function HeroAdmin() {
-  const [slides, setSlides] = useState<Slide[]>(() => adminStore.slides.get());
+  const [slides, setSlides] = useState<Slide[]>([]);
   const [editing, setEditing] = useState<Slide | null>(null);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState(EMPTY);
 
-  const persist = (updated: Slide[]) => { setSlides(updated); adminStore.slides.set(updated); };
+  useEffect(() => {
+    fetch("/api/slides")
+      .then((r) => r.json())
+      .then(setSlides);
+  }, []);
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editing) return;
-    persist(slides.map((s) => (s.id === editing.id ? editing : s)));
+    await fetch(`/api/slides/${editing.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: editing.image, subtitle: editing.subtitle, title: editing.title, description: editing.description }),
+    });
+    setSlides((prev) => prev.map((s) => (s.id === editing.id ? editing : s)));
     setEditing(null);
   };
 
-  const handleAdd = () => {
-    const id = Math.max(0, ...slides.map((s) => s.id)) + 1;
-    persist([...slides, { id, ...form }]);
+  const handleAdd = async () => {
+    const res = await fetch("/api/slides", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    const { id } = await res.json();
+    setSlides((prev) => [...prev, { id, ...form }]);
     setForm(EMPTY);
     setAdding(false);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (!confirm("삭제하시겠습니까?")) return;
-    persist(slides.filter((s) => s.id !== id));
+    await fetch(`/api/slides/${id}`, { method: "DELETE" });
+    setSlides((prev) => prev.filter((s) => s.id !== id));
   };
 
   return (
@@ -61,8 +76,18 @@ export default function HeroAdmin() {
                   </div>
                 </div>
                 <div className="flex shrink-0 gap-2">
-                  <button onClick={() => setEditing({ ...slide })} className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45]">수정</button>
-                  <button onClick={() => handleDelete(slide.id)} className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-red-400 hover:text-red-500">삭제</button>
+                  <button
+                    onClick={() => setEditing({ ...slide })}
+                    className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45]"
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={() => handleDelete(slide.id)}
+                    className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-red-400 hover:text-red-500"
+                  >
+                    삭제
+                  </button>
                 </div>
               </div>
             )}
@@ -72,28 +97,33 @@ export default function HeroAdmin() {
 
       {adding && (
         <Modal title="슬라이드 추가" onClose={() => setAdding(false)}>
-          <SlideForm data={{ id: 0, ...form }} onChange={(v) => setForm({ image: v.image, subtitle: v.subtitle, title: v.title })} onSave={handleAdd} onCancel={() => setAdding(false)} saveLabel="추가" />
+          <SlideForm
+            data={{ id: 0, ...form }}
+            onChange={(v) => setForm({ image: v.image, subtitle: v.subtitle, title: v.title, description: v.description ?? "" })}
+            onSave={handleAdd}
+            onCancel={() => setAdding(false)}
+            saveLabel="추가"
+          />
         </Modal>
       )}
     </div>
   );
 }
 
-function SlideForm({ data, onChange, onSave, onCancel, saveLabel = "저장" }: {
-  data: Slide;
-  onChange: (v: Slide) => void;
-  onSave: () => void;
-  onCancel: () => void;
-  saveLabel?: string;
-}) {
+function SlideForm({ data, onChange, onSave, onCancel, saveLabel = "저장" }: { data: Slide; onChange: (v: Slide) => void; onSave: () => void; onCancel: () => void; saveLabel?: string }) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => onChange({ ...data, image: ev.target?.result as string });
-    reader.readAsDataURL(file);
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    const { url } = await res.json();
+    onChange({ ...data, image: url });
+    setUploading(false);
   };
 
   return (
@@ -112,22 +142,42 @@ function SlideForm({ data, onChange, onSave, onCancel, saveLabel = "저장" }: {
               <p className="text-[12px] text-[#aaa]">클릭해서 이미지 업로드</p>
             </>
           )}
-          {data.image && <p className="text-[11px] text-[#aaa]">클릭해서 이미지 변경</p>}
+          {uploading && <p className="text-[12px] text-[#c90f45]">업로드 중...</p>}
+          {data.image && !uploading && <p className="text-[11px] text-[#aaa]">클릭해서 이미지 변경</p>}
         </div>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
         <p className="mt-1.5 text-[11px] text-[#bbb]">권장 크기: 1920×1080px 이상 · 최대 1MB (JPG, PNG, WebP)</p>
       </Field>
       <Field label="부제목">
-        <input value={data.subtitle} onChange={(e) => onChange({ ...data, subtitle: e.target.value })}
-          className="h-10 w-full rounded-lg border border-[#e8e8e8] px-3 text-[13px] outline-none focus:border-[#c90f45]" />
+        <input
+          value={data.subtitle}
+          onChange={(e) => onChange({ ...data, subtitle: e.target.value })}
+          className="h-10 w-full rounded-lg border border-[#e8e8e8] px-3 text-[13px] outline-none focus:border-[#c90f45]"
+        />
       </Field>
-      <Field label="제목 (줄바꿈: \n)">
-        <textarea value={data.title} onChange={(e) => onChange({ ...data, title: e.target.value })} rows={2}
-          className="w-full resize-none rounded-lg border border-[#e8e8e8] px-3 py-2 text-[13px] outline-none focus:border-[#c90f45]" />
+      <Field label="제목">
+        <textarea
+          value={data.title}
+          onChange={(e) => onChange({ ...data, title: e.target.value })}
+          rows={2}
+          className="w-full resize-none rounded-lg border border-[#e8e8e8] px-3 py-2 text-[13px] outline-none focus:border-[#c90f45]"
+        />
+      </Field>
+      <Field label="설명 (선택)">
+        <textarea
+          value={data.description ?? ""}
+          onChange={(e) => onChange({ ...data, description: e.target.value })}
+          rows={2}
+          className="w-full resize-none rounded-lg border border-[#e8e8e8] px-3 py-2 text-[13px] outline-none focus:border-[#c90f45]"
+        />
       </Field>
       <div className="flex gap-2">
-        <button onClick={onSave} className="flex h-9 items-center rounded-full bg-[#c90f45] px-5 text-[13px] font-bold text-white">{saveLabel}</button>
-        <button onClick={onCancel} className="flex h-9 items-center rounded-full border border-[#e8e8e8] px-5 text-[13px] text-[#666]">취소</button>
+        <button onClick={onSave} className="flex h-9 items-center rounded-full bg-[#c90f45] px-5 text-[13px] font-bold text-white">
+          {saveLabel}
+        </button>
+        <button onClick={onCancel} className="flex h-9 items-center rounded-full border border-[#e8e8e8] px-5 text-[13px] text-[#666]">
+          취소
+        </button>
       </div>
     </div>
   );
