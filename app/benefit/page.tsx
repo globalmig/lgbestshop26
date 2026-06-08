@@ -1,44 +1,23 @@
-import Image from "next/image";
+"use client";
 
-const posts = [
-  {
-    category: "이달의 혜택",
-    date: "2026.06",
-    title: "6월 LG전자 베스트샵 용산점 특별 구매 혜택",
-    summary: "인기 가전 구매 고객을 위한 카드 청구 할인과 매장 전용 사은 혜택을 안내드립니다.",
-    tags: ["매장혜택", "카드할인"],
-  },
-  {
-    category: "프로모션",
-    date: "2026.06",
-    title: "가전구독 결합 고객 추가 할인 안내",
-    summary: "정수기, 공기청정기, 안마의자 등 주요 구독 품목을 함께 이용하는 고객에게 적용 가능한 결합 혜택입니다.",
-    tags: ["가전구독", "결합할인"],
-  },
-  {
-    category: "이벤트",
-    date: "2026.06",
-    title: "신혼·입주 고객 패키지 상담 이벤트",
-    summary: "혼수와 입주 가전을 한 번에 상담받는 고객을 위한 패키지 구성과 사은 혜택을 준비했습니다.",
-    tags: ["신혼가전", "입주가전"],
-  },
-  {
-    category: "소식",
-    date: "2026.05",
-    title: "용산점 전문 매니저 1:1 맞춤 상담 운영",
-    summary: "제품 비교부터 설치 환경 확인까지 전문 매니저가 고객 상황에 맞춰 상담을 도와드립니다.",
-    tags: ["상담", "매장소식"],
-  },
-  {
-    category: "안내",
-    date: "2026.05",
-    title: "네이버 예약 방문 상담 이용 안내",
-    summary: "대기 시간을 줄이고 원하는 시간에 상담받을 수 있도록 네이버 예약 방문 상담을 운영합니다.",
-    tags: ["예약", "방문상담"],
-  },
-];
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+interface Post {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+}
 
 export default function BenefitNewsPage() {
+  const [posts, setPosts] = useState<Post[]>([]);
+
+  useEffect(() => {
+    fetch("/api/posts?type=benefit").then((r) => r.json()).then(setPosts);
+  }, []);
+
   return (
     <main className="bg-white text-[#171717]">
       <section className="relative isolate min-h-[430px] overflow-hidden bg-[#161616] px-5 py-24 sm:min-h-[520px] sm:py-32">
@@ -65,29 +44,29 @@ export default function BenefitNewsPage() {
             <p className="text-[14px] text-[#777]">썸네일 없이 핵심 내용만 정리했습니다.</p>
           </div>
 
-          <ul className="divide-y divide-[#ececec]">
-            {posts.map((post) => (
-              <li key={post.title} className="group py-7">
-                <article className="grid gap-4 sm:grid-cols-[140px_1fr] sm:gap-8">
-                  <div className="flex items-center gap-3 sm:block">
-                    <span className="inline-flex h-8 items-center rounded-full bg-[#f8eef2] px-3 text-[12px] font-bold text-[#c90f45]">{post.category}</span>
-                    <time className="text-[13px] font-semibold text-[#999] sm:mt-3 sm:block">{post.date}</time>
-                  </div>
-                  <div>
-                    <h3 className="break-keep text-[22px] font-black leading-[1.45] tracking-[-0.04em] text-[#1a1a1a]">{post.title}</h3>
-                    <p className="mt-3 break-keep text-[15px] leading-[1.8] text-[#666]">{post.summary}</p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {post.tags.map((tag) => (
-                        <span key={tag} className="text-[12px] font-semibold text-[#999]">
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </article>
-              </li>
-            ))}
-          </ul>
+          {posts.length === 0 ? (
+            <p className="py-20 text-center text-[14px] text-[#aaa]">등록된 소식이 없습니다.</p>
+          ) : (
+            <ul className="divide-y divide-[#ececec]">
+              {posts.map((post) => (
+                <li key={post.id} className="group py-7">
+                  <Link href={`/benefit/${post.id}`}>
+                    <article className="grid gap-4 sm:grid-cols-[140px_1fr] sm:gap-8 cursor-pointer">
+                      <div className="flex items-center gap-3 sm:block">
+                        <time className="text-[13px] font-semibold text-[#999] sm:mt-3 sm:block">
+                          {new Date(post.createdAt).toLocaleDateString("ko-KR", { year: "numeric", month: "long" })}
+                        </time>
+                      </div>
+                      <div>
+                        <h3 className="break-keep text-[22px] font-black leading-[1.45] tracking-[-0.04em] text-[#1a1a1a] group-hover:text-[#c90f45] transition-colors">{post.title}</h3>
+                        <p className="mt-3 break-keep text-[15px] leading-[1.8] text-[#666] line-clamp-2">{post.content}</p>
+                      </div>
+                    </article>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
     </main>
