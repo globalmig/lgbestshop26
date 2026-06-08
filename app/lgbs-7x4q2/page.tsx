@@ -34,9 +34,9 @@ export default function AdminPage() {
 
   const loadStats = async () => {
     const [consult, slides, managers] = await Promise.all([
-      fetch("/api/consult").then((r) => r.json()),
-      fetch("/api/slides").then((r) => r.json()),
-      fetch("/api/managers").then((r) => r.json()),
+      fetch("/api/consult").then((r) => r.json() as Promise<{ status: string; submittedAt: string }[]>),
+      fetch("/api/slides").then((r) => r.json() as Promise<unknown[]>),
+      fetch("/api/managers").then((r) => r.json() as Promise<unknown[]>),
     ]);
     setConsultList(consult);
     setStats({

@@ -14,7 +14,7 @@ export default function ConsultAdmin() {
   const [selected, setSelected] = useState<ConsultSubmission | null>(null);
 
   useEffect(() => {
-    fetch("/api/consult").then((r) => r.json()).then(setSubmissions);
+    fetch("/api/consult").then((r) => r.json() as Promise<ConsultSubmission[]>).then(setSubmissions);
   }, []);
 
   const updateStatus = async (id: string, status: ConsultSubmission["status"]) => {

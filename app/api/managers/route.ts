@@ -1,11 +1,11 @@
-import { getRequestContext } from "@cloudflare/next-on-pages";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextRequest } from "next/server";
 
 export const runtime = "edge";
 
 export async function GET() {
   try {
-    const { env } = getRequestContext();
+    const { env } = await getCloudflareContext();
     const { results } = await env.lgbestshop_db
       .prepare("SELECT * FROM managers ORDER BY sort_order ASC")
       .all();
@@ -22,8 +22,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const { env } = getRequestContext();
-  const body = await req.json();
+  const { env } = await getCloudflareContext();
+  const body = await req.json() as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   const { results } = await env.lgbestshop_db
     .prepare("SELECT COUNT(*) as cnt FROM managers")

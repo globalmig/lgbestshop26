@@ -37,7 +37,7 @@ const quickLinks = [
 export default async function Home() {
   const [blogPosts, slidesRes] = await Promise.all([
     getNaverBlogPosts("lg_yongsan"),
-    fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000"}/api/slides`).then((r) => r.json()).catch(() => []),
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000"}/api/slides`).then((r) => r.json() as Promise<import("@/data/slides").Slide[]>).catch(() => []),
   ]);
 
   return (

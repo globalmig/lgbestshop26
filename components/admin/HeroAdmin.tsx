@@ -13,7 +13,7 @@ export default function HeroAdmin() {
 
   useEffect(() => {
     fetch("/api/slides")
-      .then((r) => r.json())
+      .then((r) => r.json() as Promise<Slide[]>)
       .then(setSlides);
   }, []);
 
@@ -34,7 +34,7 @@ export default function HeroAdmin() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
-    const { id } = await res.json();
+    const { id } = await res.json() as { id: number };
     setSlides((prev) => [...prev, { id, ...form }]);
     setForm(EMPTY);
     setAdding(false);
@@ -121,7 +121,7 @@ function SlideForm({ data, onChange, onSave, onCancel, saveLabel = "저장" }: {
     const formData = new FormData();
     formData.append("file", file);
     const res = await fetch("/api/upload", { method: "POST", body: formData });
-    const { url } = await res.json();
+    const { url } = await res.json() as { url: string };
     onChange({ ...data, image: url });
     setUploading(false);
   };

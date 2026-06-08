@@ -13,7 +13,7 @@ export default function ManagerAdmin() {
   const [form, setForm] = useState<Omit<Manager, "id">>(EMPTY);
 
   useEffect(() => {
-    fetch("/api/managers").then((r) => r.json()).then(setManagers);
+    fetch("/api/managers").then((r) => r.json() as Promise<Manager[]>).then(setManagers);
   }, []);
 
   const handleSaveEdit = async () => {
@@ -138,7 +138,7 @@ function ImgUpload({ value, onChange }: { value: string; onChange: (v: string) =
     const formData = new FormData();
     formData.append("file", file);
     const res = await fetch("/api/upload", { method: "POST", body: formData });
-    const { url } = await res.json();
+    const { url } = await res.json() as { url: string };
     onChange(url);
     setUploading(false);
   };

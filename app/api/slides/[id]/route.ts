@@ -1,12 +1,12 @@
-import { getRequestContext } from "@cloudflare/next-on-pages";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextRequest } from "next/server";
 
 export const runtime = "edge";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { env } = getRequestContext();
+  const { env } = await getCloudflareContext();
   const { id } = await params;
-  const body = await req.json();
+  const body = await req.json() as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   await env.lgbestshop_db
     .prepare("UPDATE slides SET image = ?, subtitle = ?, title = ?, description = ? WHERE id = ?")
@@ -17,7 +17,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { env } = getRequestContext();
+  const { env } = await getCloudflareContext();
   const { id } = await params;
 
   const row = await env.lgbestshop_db

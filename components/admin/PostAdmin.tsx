@@ -27,7 +27,7 @@ function ImgUpload({ value, onChange }: { value: string; onChange: (url: string)
     const fd = new FormData();
     fd.append("file", file);
     const res = await fetch("/api/upload", { method: "POST", body: fd });
-    const { url } = await res.json();
+    const { url } = await res.json() as { url: string };
     onChange(url);
     setUploading(false);
   };
@@ -142,7 +142,7 @@ export default function PostAdmin({ storeKey, title }: Props) {
   const [form, setForm] = useState(EMPTY);
 
   useEffect(() => {
-    fetch(`/api/posts?type=${storeKey}`).then((r) => r.json()).then(setPosts);
+    fetch(`/api/posts?type=${storeKey}`).then((r) => r.json() as Promise<Post[]>).then(setPosts);
   }, [storeKey]);
 
   const handleAdd = async () => {

@@ -1,10 +1,10 @@
-import { getRequestContext } from "@cloudflare/next-on-pages";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextRequest } from "next/server";
 
 export const runtime = "edge";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ key: string }> }) {
-  const { env } = getRequestContext();
+  const { env } = await getCloudflareContext();
   const { key } = await params;
 
   const obj = await env.lgbestshop_storage.get(key);

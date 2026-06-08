@@ -8,7 +8,7 @@ export default function ManagerSection() {
   const [managers, setManagers] = useState<Manager[]>([]);
 
   useEffect(() => {
-    fetch("/api/managers").then((r) => r.json()).then(setManagers);
+    fetch("/api/managers").then((r) => r.json() as Promise<Manager[]>).then(setManagers);
   }, []);
 
   if (managers.length === 0) return null;

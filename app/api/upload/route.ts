@@ -1,10 +1,10 @@
-import { getRequestContext } from "@cloudflare/next-on-pages";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextRequest } from "next/server";
 
 export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
-  const { env } = getRequestContext();
+  const { env } = await getCloudflareContext();
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
 

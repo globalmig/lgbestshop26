@@ -15,7 +15,7 @@ export default function SmePage() {
   const [posts, setPosts] = useState<Post[]>([]);
 
   useEffect(() => {
-    fetch("/api/posts?type=smallbiz").then((r) => r.json()).then(setPosts);
+    fetch("/api/posts?type=smallbiz").then((r) => r.json() as Promise<Post[]>).then(setPosts);
   }, []);
 
   return (

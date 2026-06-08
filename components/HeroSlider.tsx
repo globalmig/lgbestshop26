@@ -20,7 +20,7 @@ export default function HeroSlider({ initialSlides = [] }: { initialSlides?: Sli
 
   useEffect(() => {
     if (initialSlides.length === 0) {
-      fetch("/api/slides").then((r) => r.json()).then((data) => {
+      fetch("/api/slides").then((r) => r.json() as Promise<Slide[]>).then((data) => {
         setSlides(data);
         setCurrent(0);
       });

@@ -19,7 +19,7 @@ export default function BenefitDetailPage() {
 
   useEffect(() => {
     fetch(`/api/posts/${id}`)
-      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => (r.ok ? (r.json() as Promise<Post>) : null))
       .then(setPost);
   }, [id]);
 
