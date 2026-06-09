@@ -23,7 +23,7 @@ export default function HeroAdmin() {
     await fetch(`/api/slides/${editing.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image: editing.image, subtitle: editing.subtitle, title: editing.title, description: editing.description }),
+      body: JSON.stringify({ image: editing.image, subtitle: editing.subtitle, title: editing.title, description: editing.description, show_gradient: editing.show_gradient ?? "mobile", text_color: editing.text_color ?? "black" }),
     });
     setSlides((prev) => prev.map((s) => (s.id === editing.id ? editing : s)));
     setEditing(null);
@@ -171,6 +171,43 @@ function SlideForm({ data, onChange, onSave, onCancel, saveLabel = "저장" }: {
           rows={2}
           className="w-full resize-none rounded-lg border border-[#e8e8e8] px-3 py-2 text-[13px] outline-none focus:border-[#c90f45]"
         />
+      </Field>
+      <Field label="흰 그라데이션 표시">
+        <div className="flex gap-2">
+          {(["mobile", "always", "hidden"] as const).map((val) => {
+            const labels = { mobile: "모바일만", always: "항상 표시", hidden: "숨김" };
+            const active = (data.show_gradient ?? "mobile") === val;
+            return (
+              <button
+                key={val}
+                type="button"
+                onClick={() => onChange({ ...data, show_gradient: val })}
+                className={`flex h-8 items-center rounded-full px-4 text-[12px] font-medium border transition-colors ${active ? "bg-[#c90f45] border-[#c90f45] text-white" : "border-[#e8e8e8] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45]"}`}
+              >
+                {labels[val]}
+              </button>
+            );
+          })}
+        </div>
+      </Field>
+      <Field label="텍스트 색상">
+        <div className="flex gap-2">
+          {(["black", "white"] as const).map((val) => {
+            const labels = { black: "검정", white: "흰색" };
+            const active = (data.text_color ?? "black") === val;
+            return (
+              <button
+                key={val}
+                type="button"
+                onClick={() => onChange({ ...data, text_color: val })}
+                className={`flex h-8 items-center gap-1.5 rounded-full px-4 text-[12px] font-medium border transition-colors ${active ? "bg-[#c90f45] border-[#c90f45] text-white" : "border-[#e8e8e8] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45]"}`}
+              >
+                <span className={`inline-block h-3 w-3 rounded-full border ${val === "black" ? "bg-[#1a1a1a] border-[#1a1a1a]" : "bg-white border-[#ccc]"}`} />
+                {labels[val]}
+              </button>
+            );
+          })}
+        </div>
       </Field>
       <div className="flex gap-2">
         <button onClick={onSave} className="flex h-9 items-center rounded-full bg-[#c90f45] px-5 text-[13px] font-bold text-white">

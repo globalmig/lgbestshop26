@@ -76,9 +76,11 @@ export default function HeroSlider({ initialSlides = [] }: { initialSlides?: Sli
       ))}
 
 
-      <div className="pointer-events-none absolute inset-0 z-5 bg-linear-to-r from-white to-transparent sm:hidden" />
+      {(slide.show_gradient ?? "mobile") !== "hidden" && (
+        <div className={`pointer-events-none absolute inset-0 z-5 bg-linear-to-r from-white to-transparent${(slide.show_gradient ?? "mobile") === "mobile" ? " sm:hidden" : ""}`} />
+      )}
       <div className="relative z-10 mx-auto flex h-full max-w-[1080px] items-center px-5">
-        <div className="mb-6 sm:mb-10">
+        <div className={`mb-6 sm:mb-10${slide.text_color === "white" ? " text-white" : ""}`}>
           <p className="mb-2 text-[16px] font-medium tracking-[-0.05em] sm:mb-4 sm:text-[22px] md:text-[28px] lg:text-[31px]">
             {nl(slide.subtitle)}
           </p>
