@@ -69,6 +69,7 @@ export default function HeroSlider({ initialSlides = [] }: { initialSlides?: Sli
             fill
             priority={i === 0}
             sizes="100vw"
+            unoptimized
             className="object-cover object-top"
           />
         </div>
