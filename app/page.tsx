@@ -39,15 +39,22 @@ const quickLinks = [
 ];
 
 
+async function getSlides(env: Awaited<ReturnType<typeof getCloudflareContext>>["env"]): Promise<Slide[]> {
+  try {
+    const { results } = await env.lgbestshop_db
+      .prepare("SELECT * FROM slides ORDER BY sort_order ASC")
+      .all<Slide>();
+    return results;
+  } catch {
+    return [];
+  }
+}
+
 export default async function Home() {
   const { env } = await getCloudflareContext({ async: true });
   const [blogPosts, slidesRes] = await Promise.all([
     getNaverBlogPosts("lg_yongsan"),
-    env.lgbestshop_db
-      .prepare("SELECT * FROM slides ORDER BY sort_order ASC")
-      .all<Slide>()
-      .then((r) => r.results)
-      .catch(() => [] as Slide[]),
+    getSlides(env),
   ]);
 
   return (
