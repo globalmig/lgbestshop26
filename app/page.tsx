@@ -7,6 +7,8 @@ import ManagerSection from "@/components/ManagerSection";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { Slide } from "@/data/slides";
 
+export const dynamic = "force-dynamic";
+
 const quickLinks = [
   {
     icon: "/images/icon/reservation.png",
@@ -37,7 +39,7 @@ const quickLinks = [
 
 
 export default async function Home() {
-  const { env } = getCloudflareContext();
+  const { env } = await getCloudflareContext({ async: true });
   const [blogPosts, slidesRes] = await Promise.all([
     getNaverBlogPosts("lg_yongsan"),
     env.lgbestshop_db
