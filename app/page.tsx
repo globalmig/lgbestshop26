@@ -4,6 +4,8 @@ import Benefit from "@/components/Benefit";
 import BlogSection from "@/components/BlogSection";
 import { getNaverBlogPosts } from "@/lib/naverBlog";
 import ManagerSection from "@/components/ManagerSection";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import type { Slide } from "@/data/slides";
 
 const quickLinks = [
   {
@@ -35,9 +37,14 @@ const quickLinks = [
 
 
 export default async function Home() {
+  const { env } = getCloudflareContext();
   const [blogPosts, slidesRes] = await Promise.all([
     getNaverBlogPosts("lg_yongsan"),
-    fetch(`${process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000"}/api/slides`).then((r) => r.json() as Promise<import("@/data/slides").Slide[]>).catch(() => []),
+    env.lgbestshop_db
+      .prepare("SELECT * FROM slides ORDER BY sort_order ASC")
+      .all<Slide>()
+      .then((r) => r.results)
+      .catch(() => [] as Slide[]),
   ]);
 
   return (
