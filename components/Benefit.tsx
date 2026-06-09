@@ -32,7 +32,7 @@ export default function Benefit({ bg }: BenefitProps) {
             <div key={i} className="flex min-h-[140px] flex-col justify-between overflow-hidden rounded-2xl bg-white px-5 pt-5 shadow-sm sm:min-h-[160px] sm:px-6 sm:pt-6 md:min-h-[190px] md:px-8 md:pt-7">
               <p className="whitespace-pre-line text-[1rem] font-black leading-[1.35] tracking-[-0.04em] text-[#5E4242] sm:text-[1.15rem] md:text-[1.4rem] lg:text-[1.7rem]">{item.text}</p>
               <div className="flex justify-end">
-                <Image src={item.icon} alt="" width={160} height={138} className="h-auto w-14 sm:w-20 md:w-24 lg:w-32" />
+                <Image src={item.icon} alt="" width={200} height={172} className="h-auto w-20 sm:w-28 md:w-32 lg:w-40" />
               </div>
             </div>
           ))}
