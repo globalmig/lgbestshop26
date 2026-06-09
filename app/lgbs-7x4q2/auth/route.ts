@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export const runtime = "edge";
-
 export async function POST(req: NextRequest) {
   const { password } = await req.json() as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   if (password === process.env.ADMIN_PASSWORD) {
