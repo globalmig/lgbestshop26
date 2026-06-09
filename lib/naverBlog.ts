@@ -6,9 +6,7 @@ export interface NaverBlogPost {
 
 export async function getNaverBlogPosts(blogId: string, count = 10): Promise<NaverBlogPost[]> {
   try {
-    const res = await fetch(`https://rss.blog.naver.com/${blogId}.xml`, {
-      next: { revalidate: 3600 },
-    });
+    const res = await fetch(`https://rss.blog.naver.com/${blogId}.xml`);
 
     if (!res.ok) return [];
 

@@ -7,6 +7,7 @@ import ManagerSection from "@/components/ManagerSection";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { Slide } from "@/data/slides";
 
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 const quickLinks = [
