@@ -108,6 +108,10 @@ export default function Footer() {
             ))}
           </nav>
 
+          <div className="mb-3 space-y-1 text-[11px] text-[#bbb]">
+            <p>사업자명: 우주전자 전자랜드지점 &nbsp;|&nbsp; 대표: 김진웅 &nbsp;|&nbsp; 사업자등록번호: 106-85-38456</p>
+            <p>주소: 서울특별시 용산구 청파로 74 용산전자랜드</p>
+          </div>
           <p className="text-[11px] text-[#aaa]">© 2025 LG Electronics Inc. All rights reserved.</p>
         </div>
       </footer>

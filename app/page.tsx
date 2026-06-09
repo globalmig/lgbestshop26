@@ -1,10 +1,24 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import HeroSliderClient from "@/components/HeroSliderClient";
 import Benefit from "@/components/Benefit";
 import BlogSection from "@/components/BlogSection";
 import { getNaverBlogPosts } from "@/lib/naverBlog";
 import ManagerSection from "@/components/ManagerSection";
+
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "홈",
+  description:
+    "LG전자 베스트샵 용산점에서 가전 구독, 소상공인 혜택, 이달의 소식을 확인하고 비대면 상담을 신청하세요.",
+  openGraph: {
+    title: "LG전자 베스트샵 용산점",
+    description:
+      "가전 구독부터 소상공인 전용 혜택까지, LG전자 베스트샵 용산점에서 최적의 혜택을 받아보세요.",
+    url: "/",
+  },
+};
 
 const quickLinks = [
   {
