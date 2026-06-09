@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { adminFetch } from "@/lib/adminFetch";
 import HeroAdmin from "@/components/admin/HeroAdmin";
 import ConsultAdmin from "@/components/admin/ConsultAdmin";
 import ManagerAdmin from "@/components/admin/ManagerAdmin";
@@ -27,6 +28,8 @@ export default function AdminPage() {
   const [tab, setTab] = useState<TabId>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [cfToken, setCfToken] = useState("");
+  const widgetIdRef = useRef<string>("");
 
   // 대시보드 통계
   const [stats, setStats] = useState({ consult: 0, newConsult: 0, slides: 0, managers: 0 });
@@ -34,7 +37,7 @@ export default function AdminPage() {
 
   const loadStats = async () => {
     const [consult, slides, managers] = await Promise.all([
-      fetch("/api/consult").then((r) => r.json() as Promise<{ status: string; submittedAt: string }[]>),
+      adminFetch("/api/consult").then((r) => r.json() as Promise<{ status: string; submittedAt: string }[]>),
       fetch("/api/slides").then((r) => r.json() as Promise<unknown[]>),
       fetch("/api/managers").then((r) => r.json() as Promise<unknown[]>),
     ]);
@@ -51,23 +54,68 @@ export default function AdminPage() {
     if (authed) loadStats(); // eslint-disable-line react-hooks/set-state-in-effect
   }, [authed]);
 
+  useEffect(() => {
+    if (authed) return;
+    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    if (!siteKey) return;
+
+    const render = () => {
+      const el = document.getElementById("cf-widget");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (!el || !(window as any).turnstile) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      widgetIdRef.current = (window as any).turnstile.render(el, {
+        sitekey: siteKey,
+        callback: (token: string) => setCfToken(token),
+        "expired-callback": () => setCfToken(""),
+        "error-callback": () => setCfToken(""),
+      });
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((window as any).turnstile) { render(); return; }
+
+    if (!document.getElementById("cf-turnstile-script")) {
+      const script = document.createElement("script");
+      script.id = "cf-turnstile-script";
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+      script.async = true;
+      script.onload = render;
+      document.head.appendChild(script);
+    }
+
+    return () => {
+      if (widgetIdRef.current) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (window as any).turnstile?.remove(widgetIdRef.current);
+        widgetIdRef.current = "";
+        setCfToken("");
+      }
+    };
+  }, [authed]);
+
   const login = async () => {
     const res = await fetch("/lgbs-7x4q2/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: pw }),
+      body: JSON.stringify({ password: pw, cfToken }),
     });
     if (res.ok) {
+      const { token } = await res.json() as { ok: boolean; token: string };
       sessionStorage.setItem("admin_auth", "true");
+      sessionStorage.setItem("admin_token", token);
       setAuthed(true);
       loadStats();
     } else {
       setError(true);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (widgetIdRef.current) { (window as any).turnstile?.reset(widgetIdRef.current); setCfToken(""); }
     }
   };
 
   const logout = () => {
     sessionStorage.removeItem("admin_auth");
+    sessionStorage.removeItem("admin_token");
     setAuthed(false);
     setPw("");
   };
@@ -90,7 +138,14 @@ export default function AdminPage() {
             className="mb-2 h-11 w-full rounded-xl border border-[#e8e8e8] px-4 text-[14px] outline-none focus:border-[#c90f45]"
           />
           {error && <p className="mb-3 text-[12px] text-[#c90f45]">비밀번호가 올바르지 않습니다.</p>}
-          <button onClick={login} className="flex h-11 w-full items-center justify-center rounded-full bg-[#c90f45] text-[14px] font-bold text-white hover:opacity-90">
+          {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+            <div id="cf-widget" className="mb-3 flex justify-center" />
+          )}
+          <button
+            onClick={login}
+            disabled={!!(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !cfToken)}
+            className="flex h-11 w-full items-center justify-center rounded-full bg-[#c90f45] text-[14px] font-bold text-white hover:opacity-90 disabled:opacity-40"
+          >
             로그인
           </button>
         </div>
