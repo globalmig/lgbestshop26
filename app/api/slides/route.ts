@@ -4,12 +4,15 @@ import { NextRequest } from "next/server";
 export const runtime = "edge";
 
 export async function GET() {
-  const { env } = await getCloudflareContext();
-  const { results } = await env.lgbestshop_db
-    .prepare("SELECT * FROM slides ORDER BY sort_order ASC")
-    .all();
-
-  return Response.json(results);
+  try {
+    const { env } = await getCloudflareContext();
+    const { results } = await env.lgbestshop_db
+      .prepare("SELECT * FROM slides ORDER BY sort_order ASC")
+      .all();
+    return Response.json(results);
+  } catch (e) {
+    return Response.json({ error: String(e) }, { status: 500 });
+  }
 }
 
 export async function POST(req: NextRequest) {
