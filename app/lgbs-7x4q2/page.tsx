@@ -29,6 +29,7 @@ export default function AdminPage() {
   const [collapsed, setCollapsed] = useState(false);
   const [cfToken, setCfToken] = useState("");
   const widgetIdRef = useRef<string>("");
+  const widgetElRef = useRef<HTMLDivElement>(null);
 
   // 대시보드 통계
   const [stats, setStats] = useState({ consult: 0, newConsult: 0, slides: 0, managers: 0 });
@@ -60,12 +61,13 @@ export default function AdminPage() {
   }, [authed]);
 
   useEffect(() => {
-    if (authed) return;
+    if (!mounted || authed) return;
     const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
     if (!siteKey) return;
 
     const render = () => {
-      const el = document.getElementById("cf-widget");
+      if (widgetIdRef.current) return;
+      const el = widgetElRef.current;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (!el || !(window as any).turnstile) return;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -97,7 +99,7 @@ export default function AdminPage() {
         setCfToken("");
       }
     };
-  }, [authed]);
+  }, [authed, mounted]);
 
   const login = async () => {
     const res = await fetch("/lgbs-7x4q2/auth", {
@@ -146,7 +148,7 @@ export default function AdminPage() {
           />
           {error && <p className="mb-3 text-[12px] text-[#c90f45]">비밀번호가 올바르지 않습니다.</p>}
           {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-            <div id="cf-widget" className="mb-3 flex justify-center" />
+            <div ref={widgetElRef} className="mb-3 flex justify-center" />
           )}
           <button
             onClick={login}
