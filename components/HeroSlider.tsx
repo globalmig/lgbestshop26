@@ -80,9 +80,11 @@ export default function HeroSlider({ initialSlides = [] }: { initialSlides?: Sli
           <p className="mb-2 text-[16px] font-medium tracking-[-0.05em] sm:mb-4 sm:text-[22px] md:text-[28px] lg:text-[31px]">
             {nl(slide.subtitle)}
           </p>
-          <h1 className="whitespace-pre-line text-[28px] font-black leading-[1.12] tracking-[-0.07em] sm:text-[38px] md:text-[48px] lg:text-[56px]">
-            {nl(slide.title)}
-          </h1>
+          {slide.title && (
+            <h1 className="whitespace-pre-line text-[28px] font-black leading-[1.12] tracking-[-0.07em] sm:text-[38px] md:text-[48px] lg:text-[56px]">
+              {nl(slide.title)}
+            </h1>
+          )}
           {slide.description && (
             <p className="mt-3 whitespace-pre-line text-[13px] font-medium leading-relaxed tracking-[-0.03em] opacity-80 sm:mt-4 sm:text-[15px] md:text-[16px] lg:mt-5 lg:text-[18px]">
               {nl(slide.description)}

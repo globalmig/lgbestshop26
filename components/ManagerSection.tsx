@@ -31,8 +31,8 @@ export default function ManagerSection() {
               rel={m.href.startsWith("http") ? "noopener noreferrer" : undefined}
               className="group flex w-full max-w-90 flex-col items-center rounded-2xl bg-[#fdf3f5] px-6 py-8 transition-shadow hover:shadow-md sm:max-w-80 md:max-w-75 lg:max-w-85 xl:max-w-90 md:px-8 md:py-10"
             >
-              <div className="mb-4 h-25 w-25 overflow-hidden rounded-full bg-[#f0dde2] sm:h-30 sm:w-30 md:h-35 md:w-35">
-                <Image src={m.img} alt={m.name} width={140} height={140} className="h-full w-full object-cover object-top" />
+              <div className="mb-4 h-36 w-36 overflow-hidden rounded-full bg-[#f0dde2] sm:h-44 sm:w-44 md:h-48 md:w-48">
+                <Image src={m.img} alt={m.name} width={192} height={192} className="h-full w-full object-cover object-top" />
               </div>
               <p className="mb-1 text-[17px] font-black tracking-[-0.04em] text-[#1a1a1a] sm:text-[18px] md:text-[20px]">{m.name}</p>
               <p className="mb-4 text-[12px] text-[#aaa] sm:text-[13px]">{m.store}</p>
