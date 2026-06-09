@@ -4,6 +4,8 @@ export type Slide = {
   subtitle: string;
   title: string;
   description?: string;
+  show_gradient?: "mobile" | "always" | "hidden";
+  text_color?: "black" | "white";
 };
 
 export const slides: Slide[] = [

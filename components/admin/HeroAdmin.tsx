@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { Slide } from "@/lib/adminStore";
 
-const EMPTY = { image: "", subtitle: "", title: "", description: "" };
+type SlideForm = { image: string; subtitle: string; title: string; description: string; show_gradient: "mobile" | "always" | "hidden"; text_color: "black" | "white" };
+const EMPTY: SlideForm = { image: "", subtitle: "", title: "", description: "", show_gradient: "mobile", text_color: "black" };
 
 export default function HeroAdmin() {
   const [slides, setSlides] = useState<Slide[]>([]);
   const [editing, setEditing] = useState<Slide | null>(null);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState(EMPTY);
+  const [form, setForm] = useState<SlideForm>(EMPTY);
 
   useEffect(() => {
     fetch("/api/slides")
@@ -99,7 +100,7 @@ export default function HeroAdmin() {
         <Modal title="슬라이드 추가" onClose={() => setAdding(false)}>
           <SlideForm
             data={{ id: 0, ...form }}
-            onChange={(v) => setForm({ image: v.image, subtitle: v.subtitle, title: v.title, description: v.description ?? "" })}
+            onChange={(v) => setForm({ image: v.image, subtitle: v.subtitle, title: v.title, description: v.description ?? "", show_gradient: v.show_gradient ?? "mobile", text_color: v.text_color ?? "black" })}
             onSave={handleAdd}
             onCancel={() => setAdding(false)}
             saveLabel="추가"
