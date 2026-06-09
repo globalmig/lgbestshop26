@@ -3,6 +3,21 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { Manager } from "@/lib/adminStore";
+import {
+  DndContext,
+  DragEndEvent,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const EMPTY: Omit<Manager, "id"> = { img: "", name: "", store: "용산전자상가점", tags: [], desc: "", href: "#" };
 
@@ -12,9 +27,25 @@ export default function ManagerAdmin() {
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState<Omit<Manager, "id">>(EMPTY);
 
+  const sensors = useSensors(useSensor(PointerSensor));
+
   useEffect(() => {
     fetch("/api/managers").then((r) => r.json() as Promise<Manager[]>).then(setManagers);
   }, []);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = managers.findIndex((m) => m.id === active.id);
+    const newIndex = managers.findIndex((m) => m.id === over.id);
+    const next = arrayMove(managers, oldIndex, newIndex);
+    setManagers(next);
+    fetch("/api/managers/reorder", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: next.map((m) => m.id) }),
+    });
+  };
 
   const handleSaveEdit = async () => {
     if (!editing) return;
@@ -54,41 +85,25 @@ export default function ManagerAdmin() {
         </button>
       </div>
 
-      <div className="space-y-4">
-        {managers.map((m) => (
-          <div key={m.id} className="rounded-2xl bg-white p-5 shadow-sm">
-            {editing?.id === m.id ? (
-              <div>
-                <ManagerForm data={editing} onChange={(d) => setEditing({ id: m.id, ...d })} />
-                <div className="mt-3 flex gap-2">
-                  <button onClick={handleSaveEdit} className="flex h-9 items-center rounded-full bg-[#c90f45] px-5 text-[13px] font-bold text-white">저장</button>
-                  <button onClick={() => setEditing(null)} className="flex h-9 items-center rounded-full border border-[#e8e8e8] px-5 text-[13px] text-[#666]">취소</button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-[#f0dde2]">
-                    {m.img && <Image src={m.img} alt={m.name} width={48} height={48} className="h-full w-full object-cover object-top" />}
-                  </div>
-                  <div>
-                    <p className="font-bold text-[#1a1a1a]">{m.name} <span className="text-[13px] font-normal text-[#888]">{m.store}</span></p>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {m.tags.map((tag) => (
-                        <span key={tag} className="rounded-full bg-[#fdf3f5] px-2 py-0.5 text-[11px] text-[#c90f45]">{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex shrink-0 gap-2">
-                  <button onClick={() => setEditing({ ...m })} className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45]">수정</button>
-                  <button onClick={() => handleDelete(m.id)} className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-red-400 hover:text-red-500">삭제</button>
-                </div>
-              </div>
-            )}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={managers.map((m) => m.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-4">
+            {managers.map((m) => (
+              <SortableManagerRow
+                key={m.id}
+                manager={m}
+                isEditing={editing?.id === m.id}
+                editing={editing}
+                onEditChange={(d) => setEditing({ id: m.id, ...d })}
+                onSaveEdit={handleSaveEdit}
+                onCancelEdit={() => setEditing(null)}
+                onStartEdit={() => setEditing({ ...m })}
+                onDelete={() => handleDelete(m.id)}
+              />
+            ))}
           </div>
-        ))}
-      </div>
+        </SortableContext>
+      </DndContext>
 
       {adding && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -100,6 +115,64 @@ export default function ManagerAdmin() {
               <button onClick={handleAdd} disabled={!form.name} className="flex h-10 flex-1 items-center justify-center rounded-full bg-[#c90f45] text-[14px] font-bold text-white disabled:opacity-40">추가</button>
               <button onClick={() => setAdding(false)} className="flex h-10 flex-1 items-center justify-center rounded-full border border-[#e8e8e8] text-[14px] text-[#666]">취소</button>
             </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SortableManagerRow({
+  manager, isEditing, editing, onEditChange, onSaveEdit, onCancelEdit, onStartEdit, onDelete,
+}: {
+  manager: Manager;
+  isEditing: boolean;
+  editing: Manager | null;
+  onEditChange: (v: Omit<Manager, "id">) => void;
+  onSaveEdit: () => void;
+  onCancelEdit: () => void;
+  onStartEdit: () => void;
+  onDelete: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: manager.id });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+
+  return (
+    <div ref={setNodeRef} style={style} className="rounded-2xl bg-white p-5 shadow-sm">
+      {isEditing && editing ? (
+        <div>
+          <ManagerForm data={editing} onChange={onEditChange} />
+          <div className="mt-3 flex gap-2">
+            <button onClick={onSaveEdit} className="flex h-9 items-center rounded-full bg-[#c90f45] px-5 text-[13px] font-bold text-white">저장</button>
+            <button onClick={onCancelEdit} className="flex h-9 items-center rounded-full border border-[#e8e8e8] px-5 text-[13px] text-[#666]">취소</button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <button
+              {...attributes}
+              {...listeners}
+              className="cursor-grab touch-none shrink-0 text-[#ccc] hover:text-[#888] active:cursor-grabbing px-1"
+              aria-label="순서 변경"
+            >
+              ⠿
+            </button>
+            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-[#f0dde2]">
+              {manager.img && <Image src={manager.img} alt={manager.name} width={48} height={48} className="h-full w-full object-cover object-top" />}
+            </div>
+            <div>
+              <p className="font-bold text-[#1a1a1a]">{manager.name} <span className="text-[13px] font-normal text-[#888]">{manager.store}</span></p>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {manager.tags.map((tag) => (
+                  <span key={tag} className="rounded-full bg-[#fdf3f5] px-2 py-0.5 text-[11px] text-[#c90f45]">{tag}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex shrink-0 gap-2">
+            <button onClick={onStartEdit} className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45]">수정</button>
+            <button onClick={onDelete} className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-red-400 hover:text-red-500">삭제</button>
           </div>
         </div>
       )}

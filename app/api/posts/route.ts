@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   const type = req.nextUrl.searchParams.get("type");
 
   const { results } = await env.lgbestshop_db
-    .prepare("SELECT * FROM posts WHERE type = ? ORDER BY created_at DESC")
+    .prepare("SELECT * FROM posts WHERE type = ? ORDER BY sort_order ASC, created_at DESC")
     .bind(type)
     .all();
 

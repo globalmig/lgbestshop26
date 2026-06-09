@@ -2,6 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Slide } from "@/lib/adminStore";
+import {
+  DndContext,
+  DragEndEvent,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type SlideForm = { image: string; subtitle: string; title: string; description: string; show_gradient: "mobile" | "always" | "hidden"; text_color: "black" | "white" };
 const EMPTY: SlideForm = { image: "", subtitle: "", title: "", description: "", show_gradient: "mobile", text_color: "black" };
@@ -12,11 +27,27 @@ export default function HeroAdmin() {
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState<SlideForm>(EMPTY);
 
+  const sensors = useSensors(useSensor(PointerSensor));
+
   useEffect(() => {
     fetch("/api/slides")
       .then((r) => r.json() as Promise<Slide[]>)
       .then(setSlides);
   }, []);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = slides.findIndex((s) => String(s.id) === active.id);
+    const newIndex = slides.findIndex((s) => String(s.id) === over.id);
+    const next = arrayMove(slides, oldIndex, newIndex);
+    setSlides(next);
+    fetch("/api/slides/reorder", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: next.map((s) => s.id) }),
+    });
+  };
 
   const handleSaveEdit = async () => {
     if (!editing) return;
@@ -56,45 +87,25 @@ export default function HeroAdmin() {
         </button>
       </div>
 
-      <div className="space-y-4">
-        {slides.map((slide) => (
-          <div key={slide.id} className="rounded-2xl bg-white p-5 shadow-sm">
-            {editing?.id === slide.id ? (
-              <SlideForm data={editing} onChange={setEditing as (v: typeof editing) => void} onSave={handleSaveEdit} onCancel={() => setEditing(null)} />
-            ) : (
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4 min-w-0">
-                  {slide.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={slide.image} alt="" className="h-14 w-24 shrink-0 rounded-lg object-contain bg-[#f5f5f5]" />
-                  ) : (
-                    <div className="flex h-14 w-24 shrink-0 items-center justify-center rounded-lg bg-[#f5f5f5] text-[11px] text-[#bbb]">이미지 없음</div>
-                  )}
-                  <div className="min-w-0">
-                    <p className="mb-0.5 text-[11px] text-[#aaa]">슬라이드 {slide.id}</p>
-                    <p className="text-[13px] text-[#888]">{slide.subtitle}</p>
-                    <p className="text-[15px] font-black text-[#1a1a1a]">{slide.title.replace(/\n/g, " / ")}</p>
-                  </div>
-                </div>
-                <div className="flex shrink-0 gap-2">
-                  <button
-                    onClick={() => setEditing({ ...slide })}
-                    className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45]"
-                  >
-                    수정
-                  </button>
-                  <button
-                    onClick={() => handleDelete(slide.id)}
-                    className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-red-400 hover:text-red-500"
-                  >
-                    삭제
-                  </button>
-                </div>
-              </div>
-            )}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={slides.map((s) => String(s.id))} strategy={verticalListSortingStrategy}>
+          <div className="space-y-4">
+            {slides.map((slide) => (
+              <SortableSlideRow
+                key={slide.id}
+                slide={slide}
+                isEditing={editing?.id === slide.id}
+                editing={editing}
+                onEditChange={setEditing as (v: typeof editing) => void}
+                onSaveEdit={handleSaveEdit}
+                onCancelEdit={() => setEditing(null)}
+                onStartEdit={() => setEditing({ ...slide })}
+                onDelete={() => handleDelete(slide.id)}
+              />
+            ))}
           </div>
-        ))}
-      </div>
+        </SortableContext>
+      </DndContext>
 
       {adding && (
         <Modal title="슬라이드 추가" onClose={() => setAdding(false)}>
@@ -106,6 +117,68 @@ export default function HeroAdmin() {
             saveLabel="추가"
           />
         </Modal>
+      )}
+    </div>
+  );
+}
+
+function SortableSlideRow({
+  slide, isEditing, editing, onEditChange, onSaveEdit, onCancelEdit, onStartEdit, onDelete,
+}: {
+  slide: Slide;
+  isEditing: boolean;
+  editing: Slide | null;
+  onEditChange: (v: Slide) => void;
+  onSaveEdit: () => void;
+  onCancelEdit: () => void;
+  onStartEdit: () => void;
+  onDelete: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: String(slide.id) });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+
+  return (
+    <div ref={setNodeRef} style={style} className="rounded-2xl bg-white p-5 shadow-sm">
+      {isEditing && editing ? (
+        <SlideForm data={editing} onChange={onEditChange} onSave={onSaveEdit} onCancel={onCancelEdit} />
+      ) : (
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              {...attributes}
+              {...listeners}
+              className="cursor-grab touch-none shrink-0 text-[#ccc] hover:text-[#888] active:cursor-grabbing px-1"
+              aria-label="순서 변경"
+            >
+              ⠿
+            </button>
+            {slide.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={slide.image} alt="" className="h-14 w-24 shrink-0 rounded-lg object-contain bg-[#f5f5f5]" />
+            ) : (
+              <div className="flex h-14 w-24 shrink-0 items-center justify-center rounded-lg bg-[#f5f5f5] text-[11px] text-[#bbb]">이미지 없음</div>
+            )}
+            <div className="min-w-0">
+              <p className="mb-0.5 text-[11px] text-[#aaa]">슬라이드 {slide.id}</p>
+              <p className="text-[13px] text-[#888]">{slide.subtitle}</p>
+              <p className="text-[15px] font-black text-[#1a1a1a]">{slide.title.replace(/\n/g, " / ")}</p>
+            </div>
+          </div>
+          <div className="flex shrink-0 gap-2">
+            <button
+              onClick={onStartEdit}
+              className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45]"
+            >
+              수정
+            </button>
+            <button
+              onClick={onDelete}
+              className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-red-400 hover:text-red-500"
+            >
+              삭제
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

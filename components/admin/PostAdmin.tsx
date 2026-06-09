@@ -2,6 +2,21 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import {
+  DndContext,
+  DragEndEvent,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface Post {
   id: string;
@@ -138,15 +153,83 @@ function PostModal({
   );
 }
 
+function SortablePostRow({
+  post,
+  onEdit,
+  onDelete,
+}: {
+  post: Post;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: post.id });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+
+  return (
+    <div ref={setNodeRef} style={style} className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm">
+      <button
+        {...attributes}
+        {...listeners}
+        className="cursor-grab touch-none shrink-0 text-[#ccc] hover:text-[#888] active:cursor-grabbing px-1"
+        aria-label="순서 변경"
+      >
+        ⠿
+      </button>
+      {post.image && (
+        <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg">
+          <Image src={post.image} alt="" fill className="object-cover" unoptimized />
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-bold text-[#1a1a1a]">{post.title}</p>
+        <p className="mt-0.5 line-clamp-1 text-[13px] text-[#888]">{post.content}</p>
+        <p className="mt-1 text-[11px] text-[#bbb]">
+          {new Date(post.createdAt).toLocaleDateString("ko-KR")}
+        </p>
+      </div>
+      <div className="flex shrink-0 gap-2">
+        <button
+          onClick={onEdit}
+          className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45]"
+        >
+          수정
+        </button>
+        <button
+          onClick={onDelete}
+          className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-red-400 hover:text-red-500"
+        >
+          삭제
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function PostAdmin({ storeKey, title }: Props) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [editing, setEditing] = useState<Post | null>(null);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState(EMPTY);
 
+  const sensors = useSensors(useSensor(PointerSensor));
+
   useEffect(() => {
     fetch(`/api/posts?type=${storeKey}`).then((r) => r.json() as Promise<Post[]>).then(setPosts);
   }, [storeKey]);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = posts.findIndex((p) => p.id === active.id);
+    const newIndex = posts.findIndex((p) => p.id === over.id);
+    const next = arrayMove(posts, oldIndex, newIndex);
+    setPosts(next);
+    fetch("/api/posts/reorder", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: next.map((p) => p.id) }),
+    });
+  };
 
   const handleAdd = async () => {
     const newPost: Post = { id: Date.now().toString(), ...form, createdAt: new Date().toISOString() };
@@ -194,38 +277,20 @@ export default function PostAdmin({ storeKey, title }: Props) {
           등록된 게시글이 없습니다.
         </div>
       ) : (
-        <div className="space-y-3">
-          {posts.map((post) => (
-            <div key={post.id} className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm">
-              {post.image && (
-                <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg">
-                  <Image src={post.image} alt="" fill className="object-cover" unoptimized />
-                </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-bold text-[#1a1a1a]">{post.title}</p>
-                <p className="mt-0.5 line-clamp-1 text-[13px] text-[#888]">{post.content}</p>
-                <p className="mt-1 text-[11px] text-[#bbb]">
-                  {new Date(post.createdAt).toLocaleDateString("ko-KR")}
-                </p>
-              </div>
-              <div className="flex shrink-0 gap-2">
-                <button
-                  onClick={() => setEditing({ ...post })}
-                  className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45]"
-                >
-                  수정
-                </button>
-                <button
-                  onClick={() => handleDelete(post.id)}
-                  className="flex h-8 items-center rounded-full border border-[#e8e8e8] px-4 text-[12px] text-[#555] hover:border-red-400 hover:text-red-500"
-                >
-                  삭제
-                </button>
-              </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={posts.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-3">
+              {posts.map((post) => (
+                <SortablePostRow
+                  key={post.id}
+                  post={post}
+                  onEdit={() => setEditing({ ...post })}
+                  onDelete={() => handleDelete(post.id)}
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {adding && (
