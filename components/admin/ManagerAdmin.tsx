@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { Manager } from "@/lib/adminStore";
+import { adminFetch } from "@/lib/adminFetch";
 import {
   DndContext,
   DragEndEvent,
@@ -40,7 +41,7 @@ export default function ManagerAdmin() {
     const newIndex = managers.findIndex((m) => m.id === over.id);
     const next = arrayMove(managers, oldIndex, newIndex);
     setManagers(next);
-    fetch("/api/managers/reorder", {
+    adminFetch("/api/managers/reorder", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ids: next.map((m) => m.id) }),
@@ -49,7 +50,7 @@ export default function ManagerAdmin() {
 
   const handleSaveEdit = async () => {
     if (!editing) return;
-    await fetch(`/api/managers/${editing.id}`, {
+    await adminFetch(`/api/managers/${editing.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(editing),
@@ -60,7 +61,7 @@ export default function ManagerAdmin() {
 
   const handleAdd = async () => {
     const newManager = { id: Date.now().toString(), ...form };
-    await fetch("/api/managers", {
+    await adminFetch("/api/managers", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newManager),
@@ -72,7 +73,7 @@ export default function ManagerAdmin() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("삭제하시겠습니까?")) return;
-    await fetch(`/api/managers/${id}`, { method: "DELETE" });
+    await adminFetch(`/api/managers/${id}`, { method: "DELETE" });
     setManagers((prev) => prev.filter((m) => m.id !== id));
   };
 
@@ -210,7 +211,7 @@ function ImgUpload({ value, onChange }: { value: string; onChange: (v: string) =
     setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    const res = await adminFetch("/api/upload", { method: "POST", body: formData });
     const { url } = await res.json() as { url: string };
     onChange(url);
     setUploading(false);

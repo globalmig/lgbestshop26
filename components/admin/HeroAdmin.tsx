@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Slide } from "@/lib/adminStore";
+import { adminFetch } from "@/lib/adminFetch";
 import {
   DndContext,
   DragEndEvent,
@@ -42,7 +43,7 @@ export default function HeroAdmin() {
     const newIndex = slides.findIndex((s) => String(s.id) === over.id);
     const next = arrayMove(slides, oldIndex, newIndex);
     setSlides(next);
-    fetch("/api/slides/reorder", {
+    adminFetch("/api/slides/reorder", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ids: next.map((s) => s.id) }),
@@ -51,7 +52,7 @@ export default function HeroAdmin() {
 
   const handleSaveEdit = async () => {
     if (!editing) return;
-    await fetch(`/api/slides/${editing.id}`, {
+    await adminFetch(`/api/slides/${editing.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ image: editing.image, subtitle: editing.subtitle, title: editing.title, description: editing.description, show_gradient: editing.show_gradient ?? "mobile", text_color: editing.text_color ?? "black" }),
@@ -61,7 +62,7 @@ export default function HeroAdmin() {
   };
 
   const handleAdd = async () => {
-    const res = await fetch("/api/slides", {
+    const res = await adminFetch("/api/slides", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
@@ -74,7 +75,7 @@ export default function HeroAdmin() {
 
   const handleDelete = async (id: number) => {
     if (!confirm("삭제하시겠습니까?")) return;
-    await fetch(`/api/slides/${id}`, { method: "DELETE" });
+    await adminFetch(`/api/slides/${id}`, { method: "DELETE" });
     setSlides((prev) => prev.filter((s) => s.id !== id));
   };
 
@@ -194,7 +195,7 @@ function SlideForm({ data, onChange, onSave, onCancel, saveLabel = "저장" }: {
     setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    const res = await adminFetch("/api/upload", { method: "POST", body: formData });
     const { url } = await res.json() as { url: string };
     onChange({ ...data, image: url });
     setUploading(false);

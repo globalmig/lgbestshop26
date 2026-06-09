@@ -1,5 +1,6 @@
 ﻿import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextRequest } from "next/server";
+import { verifyAdmin } from "@/lib/adminAuth";
 
 export async function GET(req: NextRequest) {
   const { env } = await getCloudflareContext();
@@ -19,6 +20,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  if (!await verifyAdmin(req)) return Response.json({ error: "Unauthorized" }, { status: 401 });
   const { env } = await getCloudflareContext();
   const body = await req.json() as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 

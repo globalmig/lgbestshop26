@@ -32,9 +32,12 @@ export default function ConsultForm() {
   const [apartmentName, setApartmentName] = useState("");
   const [channels, setChannels] = useState<string[]>([]);
   const [fileName, setFileName] = useState("");
+  const [fileError, setFileError] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const selectedFileRef = useRef<File | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
   const areaRef = useRef<HTMLInputElement>(null);
@@ -47,16 +50,40 @@ export default function ConsultForm() {
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setFileError("");
     if (file.size > 10 * 1024 * 1024) {
-      alert("파일 크기는 최대 10MB까지 가능합니다.");
+      setFileError("파일 크기는 최대 10MB까지 가능합니다.");
       e.target.value = "";
       return;
     }
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+    if (!["jpg", "jpeg", "png", "webp", "gif"].includes(ext)) {
+      setFileError("JPG, PNG, WebP, GIF 파일만 업로드 가능합니다.");
+      e.target.value = "";
+      return;
+    }
+    selectedFileRef.current = file;
     setFileName(file.name);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setUploading(true);
+
+    let file_url: string | null = null;
+    if (selectedFileRef.current) {
+      const formData = new FormData();
+      formData.append("file", selectedFileRef.current);
+      const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
+      if (!uploadRes.ok) {
+        const { error } = await uploadRes.json() as { error: string };
+        setFileError(error ?? "파일 업로드에 실패했습니다.");
+        setUploading(false);
+        return;
+      }
+      ({ url: file_url } = await uploadRes.json() as { url: string });
+    }
+
     await fetch("/api/consult", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -70,8 +97,10 @@ export default function ConsultForm() {
         channels,
         model: modelRef.current?.value ?? "",
         submittedAt: new Date().toISOString(),
+        file_url,
       }),
     });
+    setUploading(false);
     setSubmitted(true);
   };
 
@@ -241,7 +270,8 @@ export default function ConsultForm() {
             </>
           )}
         </div>
-        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleFile} />
+        {fileError && <p className="mt-2 text-[12px] text-[#c90f45]">{fileError}</p>}
       </div>
 
       {/* 개인정보 동의 */}
@@ -268,10 +298,10 @@ export default function ConsultForm() {
 
       <button
         type="submit"
-        disabled={!agreed}
+        disabled={!agreed || uploading}
         className="flex h-13 w-full items-center justify-center rounded-full bg-[#c90f45] text-[15px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
       >
-        상담 신청하기 🚀
+        {uploading ? "제출 중..." : "상담 신청하기 🚀"}
       </button>
 
       {/* 개인정보 모달 */}

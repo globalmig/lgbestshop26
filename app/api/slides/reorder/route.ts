@@ -1,7 +1,9 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextRequest } from "next/server";
+import { verifyAdmin } from "@/lib/adminAuth";
 
 export async function PATCH(req: NextRequest) {
+  if (!await verifyAdmin(req)) return Response.json({ error: "Unauthorized" }, { status: 401 });
   const { env } = await getCloudflareContext();
   const { ids } = await req.json() as { ids: number[] };
 

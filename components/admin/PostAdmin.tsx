@@ -17,6 +17,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { adminFetch } from "@/lib/adminFetch";
 
 interface Post {
   id: string;
@@ -41,7 +42,7 @@ function ImgUpload({ value, onChange }: { value: string; onChange: (url: string)
     setUploading(true);
     const fd = new FormData();
     fd.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    const res = await adminFetch("/api/upload", { method: "POST", body: fd });
     const { url } = await res.json() as { url: string };
     onChange(url);
     setUploading(false);
@@ -224,7 +225,7 @@ export default function PostAdmin({ storeKey, title }: Props) {
     const newIndex = posts.findIndex((p) => p.id === over.id);
     const next = arrayMove(posts, oldIndex, newIndex);
     setPosts(next);
-    fetch("/api/posts/reorder", {
+    adminFetch("/api/posts/reorder", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ids: next.map((p) => p.id) }),
@@ -233,7 +234,7 @@ export default function PostAdmin({ storeKey, title }: Props) {
 
   const handleAdd = async () => {
     const newPost: Post = { id: Date.now().toString(), ...form, createdAt: new Date().toISOString() };
-    await fetch("/api/posts", {
+    await adminFetch("/api/posts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...newPost, type: storeKey }),
@@ -245,7 +246,7 @@ export default function PostAdmin({ storeKey, title }: Props) {
 
   const handleSaveEdit = async () => {
     if (!editing) return;
-    await fetch(`/api/posts/${editing.id}`, {
+    await adminFetch(`/api/posts/${editing.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: editing.title, content: editing.content, image: editing.image ?? "" }),
@@ -256,7 +257,7 @@ export default function PostAdmin({ storeKey, title }: Props) {
 
   const handleDelete = async (id: string) => {
     if (!confirm("삭제하시겠습니까?")) return;
-    await fetch(`/api/posts/${id}`, { method: "DELETE" });
+    await adminFetch(`/api/posts/${id}`, { method: "DELETE" });
     setPosts((prev) => prev.filter((p) => p.id !== id));
   };
 

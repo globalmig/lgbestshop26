@@ -23,6 +23,7 @@ export interface ConsultSubmission {
   model: string;
   submittedAt: string;
   status: "new" | "inProgress" | "completed";
+  file_url?: string;
 }
 
 export interface Post {
