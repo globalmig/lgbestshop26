@@ -20,9 +20,8 @@ const NAV = [
 type TabId = (typeof NAV)[number]["id"];
 
 export default function AdminPage() {
-  const [authed, setAuthed] = useState(() =>
-    typeof window !== "undefined" && sessionStorage.getItem("admin_auth") === "true"
-  );
+  const [mounted, setMounted] = useState(false);
+  const [authed, setAuthed] = useState(false);
   const [pw, setPw] = useState("");
   const [error, setError] = useState(false);
   const [tab, setTab] = useState<TabId>("dashboard");
@@ -49,6 +48,12 @@ export default function AdminPage() {
       managers: managers.length,
     });
   };
+
+  useEffect(() => {
+    const wasAuthed = sessionStorage.getItem("admin_auth") === "true";
+    setAuthed(wasAuthed);
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (authed) loadStats(); // eslint-disable-line react-hooks/set-state-in-effect
@@ -119,6 +124,8 @@ export default function AdminPage() {
     setAuthed(false);
     setPw("");
   };
+
+  if (!mounted) return null;
 
   if (!authed) {
     return (
