@@ -34,10 +34,13 @@ function ImgUpload({ value, onChange }: { value: string; onChange: (url: string)
 
   return (
     <div className="space-y-1.5">
-      <p className="text-[12px] font-semibold text-[#666]">이미지 (선택)</p>
+      <div className="flex items-baseline gap-2">
+        <p className="text-[12px] font-semibold text-[#666]">이미지 (선택)</p>
+        <p className="text-[11px] text-[#bbb]">권장 크기: 1200 × 630px · 최대 5MB · JPG/PNG</p>
+      </div>
       {value ? (
-        <div className="relative h-44 w-full overflow-hidden rounded-xl border border-[#e8e8e8]">
-          <Image src={value} alt="preview" fill className="object-cover" unoptimized />
+        <div className="relative flex h-44 w-full items-center justify-center overflow-hidden rounded-xl border border-[#e8e8e8] bg-[#f8f8f8]">
+          <Image src={value} alt="preview" fill className="object-contain" unoptimized />
           <button
             type="button"
             onClick={() => onChange("")}
