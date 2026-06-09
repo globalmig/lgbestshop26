@@ -42,8 +42,8 @@ export default function BenefitDetailPage() {
       <section className="px-5 py-14 sm:py-20">
         <div className="mx-auto max-w-[780px]">
           {post.image && (
-            <div className="relative mb-10 h-[320px] w-full overflow-hidden rounded-2xl sm:h-[440px]">
-              <Image src={post.image} alt={post.title} fill className="object-cover" unoptimized />
+            <div className="mb-10 flex justify-center">
+              <img src={post.image} alt={post.title} className="max-w-full rounded-2xl" />
             </div>
           )}
           <p className="break-keep text-[16px] leading-[2] text-[#444] sm:text-[17px]">{post.content}</p>
