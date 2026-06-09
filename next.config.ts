@@ -6,6 +6,9 @@ if (process.env.NODE_ENV === "development") {
 }
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: "0x4AAAAAADhO6Nx4Tu8Luy0M",
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**.pstatic.net" },
