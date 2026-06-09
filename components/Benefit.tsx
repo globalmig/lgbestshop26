@@ -27,12 +27,12 @@ export default function Benefit({ bg }: BenefitProps) {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
           {benefits.map((item, i) => (
-            <div key={i} className="flex min-h-[140px] flex-col justify-between overflow-hidden rounded-2xl bg-white px-5 pt-5 shadow-sm sm:min-h-[160px] sm:px-6 sm:pt-6 md:min-h-[190px] md:px-8 md:pt-7">
-              <p className="whitespace-pre-line text-[1rem] font-black leading-[1.35] tracking-[-0.04em] text-[#5E4242] sm:text-[1.15rem] md:text-[1.4rem] lg:text-[1.7rem]">{item.text}</p>
+            <div key={i} className="flex min-h-30 flex-col justify-center overflow-hidden rounded-2xl bg-white px-20 pt-4 shadow-sm sm:min-h-35 sm:px-6 sm:pt-5 md:min-h-40 md:px-8 md:pt-6">
+              <p className="whitespace-pre-line text-[1.4rem] font-black leading-[1.35] tracking-[-0.04em] text-[#5E4242] md:text-[1.4rem] lg:text-[1.7rem]">{item.text}</p>
               <div className="flex justify-end">
-                <Image src={item.icon} alt="" width={200} height={172} className="h-auto w-20 sm:w-28 md:w-32 lg:w-40" />
+                <Image src={item.icon} alt="" width={200} height={172} className="h-auto w-28 md:w-32 lg:w-40" />
               </div>
             </div>
           ))}
