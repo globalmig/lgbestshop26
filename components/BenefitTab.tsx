@@ -124,7 +124,7 @@ function BenefitCard({ item }: { item: BenefitItem }) {
         boxShadow: "2px 3px 12px #FFCED8",
       }}
     >
-      <div className="animate-float absolute -right-2 -top-14 sm:-right-3 sm:-top-20" style={{ animationDelay: `${(item.id - 1) * 0.4}s` }}>
+      <div className="animate-float absolute -right-2 -top-8 sm:-right-3 sm:-top-20" style={{ animationDelay: `${(item.id - 1) * 0.4}s` }}>
         <Image src={item.icon} alt="" width={170} height={170} className="w-20 sm:w-28 lg:w-42.5" />
       </div>
 
@@ -180,7 +180,7 @@ function MembershipCard() {
         boxShadow: "2px 3px 12px #FFCED8",
       }}
     >
-      <div className="animate-float absolute -right-2 -top-14 sm:-right-3 sm:-top-20" style={{ animationDelay: "0.2s" }}>
+      <div className="animate-float absolute -right-2 -top-8 sm:-right-3 sm:-top-20" style={{ animationDelay: "0.2s" }}>
         <Image src="/images/icon/3D/coin.png" alt="" width={170} height={170} className="w-20 sm:w-28 lg:w-42.5" />
       </div>
 
@@ -251,7 +251,7 @@ export default function BenefitTab() {
           <MembershipCard />
           <a
             href="https://docs.google.com/forms/d/1eE__jHrr2ywkEuFu0G18wEFIdKqUt9AUdbsGv6k94sY/edit"
-            className="flex min-h-40 items-center justify-center rounded-2xl bg-[#c90f45] p-6 text-center"
+            className="hidden sm:flex min-h-40 items-center justify-center rounded-2xl bg-[#c90f45] p-6 text-center"
             style={{ boxShadow: "0 8px 28px rgba(255, 204, 218, 0.89)" }}
           >
             <span className="text-[22px] font-black leading-[1.4] text-white sm:text-[24px] md:text-[28px]">상담 신청!</span>
