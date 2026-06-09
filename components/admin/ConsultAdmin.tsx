@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { ConsultSubmission } from "@/lib/adminStore";
+import { adminFetch } from "@/lib/adminFetch";
 
 const STATUS = {
   new: { label: "신규", cls: "bg-blue-50 text-blue-600 border-blue-200" },
@@ -14,11 +15,11 @@ export default function ConsultAdmin() {
   const [selected, setSelected] = useState<ConsultSubmission | null>(null);
 
   useEffect(() => {
-    fetch("/api/consult").then((r) => r.json() as Promise<ConsultSubmission[]>).then(setSubmissions);
+    adminFetch("/api/consult").then((r) => r.json() as Promise<ConsultSubmission[]>).then(setSubmissions);
   }, []);
 
   const updateStatus = async (id: string, status: ConsultSubmission["status"]) => {
-    await fetch(`/api/consult/${id}`, {
+    await adminFetch(`/api/consult/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
@@ -29,7 +30,7 @@ export default function ConsultAdmin() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("삭제하시겠습니까?")) return;
-    await fetch(`/api/consult/${id}`, { method: "DELETE" });
+    await adminFetch(`/api/consult/${id}`, { method: "DELETE" });
     setSubmissions((prev) => prev.filter((s) => s.id !== id));
     if (selected?.id === id) setSelected(null);
   };
@@ -87,6 +88,13 @@ export default function ConsultAdmin() {
                     <span className="text-[13px] text-[#333]">{value}</span>
                   </div>
                 ))}
+                <div className="flex gap-3">
+                  <span className="w-20 shrink-0 text-[12px] font-semibold text-[#888]">첨부파일</span>
+                  {selected.file_url
+                    ? <a href={selected.file_url} target="_blank" rel="noopener noreferrer" className="text-[13px] text-[#c90f45] underline underline-offset-2">견적서 보기</a>
+                    : <span className="text-[13px] text-[#bbb]">없음</span>
+                  }
+                </div>
               </div>
             </div>
 
