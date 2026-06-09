@@ -4,10 +4,6 @@ import Benefit from "@/components/Benefit";
 import BlogSection from "@/components/BlogSection";
 import { getNaverBlogPosts } from "@/lib/naverBlog";
 import ManagerSection from "@/components/ManagerSection";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-import type { Slide } from "@/data/slides";
-
-export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 const quickLinks = [
@@ -39,28 +35,13 @@ const quickLinks = [
 ];
 
 
-async function getSlides(env: Awaited<ReturnType<typeof getCloudflareContext>>["env"]): Promise<Slide[]> {
-  try {
-    const { results } = await env.lgbestshop_db
-      .prepare("SELECT * FROM slides ORDER BY sort_order ASC")
-      .all<Slide>();
-    return results;
-  } catch {
-    return [];
-  }
-}
-
 export default async function Home() {
-  const { env } = await getCloudflareContext({ async: true });
-  const [blogPosts, slidesRes] = await Promise.all([
-    getNaverBlogPosts("lg_yongsan"),
-    getSlides(env),
-  ]);
+  const blogPosts = await getNaverBlogPosts("lg_yongsan");
 
   return (
     <>
       <main className="min-h-[calc(100vh-44px)] bg-white text-black">
-        <HeroSliderClient initialSlides={slidesRes} />
+        <HeroSliderClient initialSlides={[]} />
 
         {/* 퀵메뉴 */}
         <section className="border-t border-[#f1f1f1] bg-white">
