@@ -11,6 +11,17 @@ interface Post {
   createdAt: string;
 }
 
+function stripHtml(content: string): string {
+  try {
+    const parsed = JSON.parse(content);
+    if (Array.isArray(parsed)) {
+      const first = parsed.find((b: { type: string }) => b.type === "text") as { value: string } | undefined;
+      return first?.value ?? "";
+    }
+  } catch {}
+  return content.replace(/<[^>]+>/g, "").trim();
+}
+
 export default function SmePage() {
   const [posts, setPosts] = useState<Post[]>([]);
 
@@ -57,7 +68,7 @@ export default function SmePage() {
                       </div>
                       <div>
                         <h3 className="break-keep text-[22px] font-black leading-[1.45] tracking-[-0.04em] text-[#1a1a1a] group-hover:text-[#c90f45] transition-colors">{post.title}</h3>
-                        <p className="mt-3 break-keep text-[15px] leading-[1.8] text-[#666] line-clamp-2">{post.content}</p>
+                        <p className="mt-3 break-keep text-[15px] leading-[1.8] text-[#666] line-clamp-2">{stripHtml(post.content)}</p>
                       </div>
                     </article>
                   </Link>
