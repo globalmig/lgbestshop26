@@ -9,8 +9,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const body = await req.json() as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   await env.lgbestshop_db
-    .prepare("UPDATE slides SET image = ?, subtitle = ?, title = ?, description = ?, show_gradient = ?, text_color = ? WHERE id = ?")
-    .bind(body.image ?? "", body.subtitle ?? "", body.title ?? "", body.description ?? "", body.show_gradient ?? "mobile", body.text_color ?? "black", Number(id))
+    .prepare("UPDATE slides SET image = ?, image_mobile = ?, subtitle = ?, title = ?, description = ?, show_gradient = ?, text_color = ? WHERE id = ?")
+    .bind(body.image ?? "", body.image_mobile ?? "", body.subtitle ?? "", body.title ?? "", body.description ?? "", body.show_gradient ?? "mobile", body.text_color ?? "black", Number(id))
     .run();
 
   return Response.json({ ok: true });
@@ -22,9 +22,9 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const { id } = await params;
 
   const row = await env.lgbestshop_db
-    .prepare("SELECT image FROM slides WHERE id = ?")
+    .prepare("SELECT image, image_mobile FROM slides WHERE id = ?")
     .bind(Number(id))
-    .first<{ image: string }>();
+    .first<{ image: string; image_mobile: string }>();
 
   await env.lgbestshop_db
     .prepare("DELETE FROM slides WHERE id = ?")
@@ -33,6 +33,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
   const key = row?.image?.split("/api/files/")[1];
   if (key) await env.lgbestshop_storage.delete(key);
+  const mobileKey = row?.image_mobile?.split("/api/files/")[1];
+  if (mobileKey) await env.lgbestshop_storage.delete(mobileKey);
 
   return Response.json({ ok: true });
 }

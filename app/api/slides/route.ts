@@ -25,8 +25,8 @@ export async function POST(req: NextRequest) {
   const maxId = (results[0]?.maxId as number) ?? 0;
 
   await env.lgbestshop_db
-    .prepare("INSERT INTO slides (id, image, subtitle, title, description, show_gradient, text_color, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-    .bind(maxId + 1, body.image ?? "", body.subtitle ?? "", body.title ?? "", body.description ?? "", body.show_gradient ?? "mobile", body.text_color ?? "black", maxId + 1)
+    .prepare("INSERT INTO slides (id, image, image_mobile, subtitle, title, description, show_gradient, text_color, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    .bind(maxId + 1, body.image ?? "", body.image_mobile ?? "", body.subtitle ?? "", body.title ?? "", body.description ?? "", body.show_gradient ?? "mobile", body.text_color ?? "black", maxId + 1)
     .run();
 
   return Response.json({ ok: true, id: maxId + 1 });

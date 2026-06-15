@@ -1,6 +1,7 @@
 export type Slide = {
   id: number;
   image: string;
+  image_mobile?: string;
   subtitle: string;
   title: string;
   description?: string;

@@ -19,8 +19,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-type SlideForm = { image: string; subtitle: string; title: string; description: string; show_gradient: "mobile" | "always" | "hidden"; text_color: "black" | "white" };
-const EMPTY: SlideForm = { image: "", subtitle: "", title: "", description: "", show_gradient: "mobile", text_color: "black" };
+type SlideForm = { image: string; image_mobile: string; subtitle: string; title: string; description: string; show_gradient: "mobile" | "always" | "hidden"; text_color: "black" | "white" };
+const EMPTY: SlideForm = { image: "", image_mobile: "", subtitle: "", title: "", description: "", show_gradient: "mobile", text_color: "black" };
 
 export default function HeroAdmin() {
   const [slides, setSlides] = useState<Slide[]>([]);
@@ -55,7 +55,7 @@ export default function HeroAdmin() {
     await adminFetch(`/api/slides/${editing.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image: editing.image, subtitle: editing.subtitle, title: editing.title, description: editing.description, show_gradient: editing.show_gradient ?? "mobile", text_color: editing.text_color ?? "black" }),
+      body: JSON.stringify({ image: editing.image, image_mobile: editing.image_mobile ?? "", subtitle: editing.subtitle, title: editing.title, description: editing.description, show_gradient: editing.show_gradient ?? "mobile", text_color: editing.text_color ?? "black" }),
     });
     setSlides((prev) => prev.map((s) => (s.id === editing.id ? editing : s)));
     setEditing(null);
@@ -112,7 +112,7 @@ export default function HeroAdmin() {
         <Modal title="슬라이드 추가" onClose={() => setAdding(false)}>
           <SlideForm
             data={{ id: 0, ...form }}
-            onChange={(v) => setForm({ image: v.image, subtitle: v.subtitle, title: v.title, description: v.description ?? "", show_gradient: v.show_gradient ?? "mobile", text_color: v.text_color ?? "black" })}
+            onChange={(v) => setForm({ image: v.image, image_mobile: v.image_mobile ?? "", subtitle: v.subtitle, title: v.title, description: v.description ?? "", show_gradient: v.show_gradient ?? "mobile", text_color: v.text_color ?? "black" })}
             onSave={handleAdd}
             onCancel={() => setAdding(false)}
             saveLabel="추가"
@@ -153,12 +153,20 @@ function SortableSlideRow({
             >
               ⠿
             </button>
-            {slide.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={slide.image} alt="" className="h-14 w-24 shrink-0 rounded-lg object-contain bg-[#f5f5f5]" />
-            ) : (
-              <div className="flex h-14 w-24 shrink-0 items-center justify-center rounded-lg bg-[#f5f5f5] text-[11px] text-[#bbb]">이미지 없음</div>
-            )}
+            <div className="flex shrink-0 gap-1.5">
+              {slide.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={slide.image} alt="PC" title="PC 이미지" className="h-14 w-20 rounded-lg object-contain bg-[#f5f5f5]" />
+              ) : (
+                <div className="flex h-14 w-20 items-center justify-center rounded-lg bg-[#f5f5f5] text-[11px] text-[#bbb]">없음</div>
+              )}
+              {slide.image_mobile ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={slide.image_mobile} alt="모바일" title="모바일 이미지" className="h-14 w-10 rounded-lg object-contain bg-[#eef5ff]" />
+              ) : (
+                <div className="flex h-14 w-10 items-center justify-center rounded-lg bg-[#f5f5f5] text-[9px] text-[#ccc]">📱</div>
+              )}
+            </div>
             <div className="min-w-0">
               <p className="mb-0.5 text-[11px] text-[#aaa]">슬라이드 {slide.id}</p>
               <p className="text-[13px] text-[#888]">{slide.subtitle}</p>
@@ -187,7 +195,9 @@ function SortableSlideRow({
 
 function SlideForm({ data, onChange, onSave, onCancel, saveLabel = "저장" }: { data: Slide; onChange: (v: Slide) => void; onSave: () => void; onCancel: () => void; saveLabel?: string }) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const fileRefMobile = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingMobile, setUploadingMobile] = useState(false);
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -201,9 +211,21 @@ function SlideForm({ data, onChange, onSave, onCancel, saveLabel = "저장" }: {
     setUploading(false);
   };
 
+  const handleFileMobile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingMobile(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await adminFetch("/api/upload", { method: "POST", body: formData });
+    const { url } = await res.json() as { url: string };
+    onChange({ ...data, image_mobile: url });
+    setUploadingMobile(false);
+  };
+
   return (
     <div className="space-y-3">
-      <Field label="이미지">
+      <Field label="PC 이미지">
         <div
           onClick={() => fileRef.current?.click()}
           className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#e8e8e8] py-5 hover:border-[#c90f45] transition-colors"
@@ -222,6 +244,37 @@ function SlideForm({ data, onChange, onSave, onCancel, saveLabel = "저장" }: {
         </div>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
         <p className="mt-1.5 text-[11px] text-[#bbb]">권장 크기: 1920×1080px 이상 · 최대 1MB (JPG, PNG, WebP)</p>
+      </Field>
+      <Field label="모바일 이미지 (선택 — 미등록 시 PC 이미지 사용)">
+        <div
+          onClick={() => fileRefMobile.current?.click()}
+          className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#e8e8e8] py-5 hover:border-[#c90f45] transition-colors"
+        >
+          {data.image_mobile ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={data.image_mobile} alt="" className="max-h-32 w-full rounded-lg object-contain" />
+          ) : (
+            <>
+              <span className="text-[24px]">📱</span>
+              <p className="text-[12px] text-[#aaa]">클릭해서 모바일 이미지 업로드</p>
+            </>
+          )}
+          {uploadingMobile && <p className="text-[12px] text-[#c90f45]">업로드 중...</p>}
+          {data.image_mobile && !uploadingMobile && (
+            <div className="flex items-center gap-3">
+              <p className="text-[11px] text-[#aaa]">클릭해서 이미지 변경</p>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onChange({ ...data, image_mobile: "" }); }}
+                className="text-[11px] text-red-400 hover:text-red-600"
+              >
+                삭제
+              </button>
+            </div>
+          )}
+        </div>
+        <input ref={fileRefMobile} type="file" accept="image/*" className="hidden" onChange={handleFileMobile} />
+        <p className="mt-1.5 text-[11px] text-[#bbb]">권장 크기: 768×1200px 이상 · 최대 1MB (JPG, PNG, WebP)</p>
       </Field>
       <Field label="부제목">
         <input

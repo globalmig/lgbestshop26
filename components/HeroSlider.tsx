@@ -63,15 +63,38 @@ export default function HeroSlider({ initialSlides = [] }: { initialSlides?: Sli
           key={s.id}
           className={`absolute inset-0 transition-opacity duration-700 ${i === current ? "opacity-100" : "opacity-0"}`}
         >
-          <Image
-            src={s.image}
-            alt=""
-            fill
-            priority={i === 0}
-            sizes="100vw"
-            unoptimized
-            className="object-cover object-top"
-          />
+          {s.image_mobile ? (
+            <>
+              <Image
+                src={s.image_mobile}
+                alt=""
+                fill
+                priority={i === 0}
+                sizes="100vw"
+                unoptimized
+                className="object-cover object-top sm:hidden"
+              />
+              <Image
+                src={s.image}
+                alt=""
+                fill
+                priority={i === 0}
+                sizes="100vw"
+                unoptimized
+                className="object-cover object-top hidden sm:block"
+              />
+            </>
+          ) : (
+            <Image
+              src={s.image}
+              alt=""
+              fill
+              priority={i === 0}
+              sizes="100vw"
+              unoptimized
+              className="object-cover object-top"
+            />
+          )}
         </div>
       ))}
 

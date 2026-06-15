@@ -1,0 +1,1 @@
+ALTER TABLE slides ADD COLUMN image_mobile TEXT NOT NULL DEFAULT '';
