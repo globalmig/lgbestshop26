@@ -4,6 +4,34 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 
+type Block = { type: "text"; value: string } | { type: "image"; url: string };
+
+function parseBlocks(content: string): Block[] {
+  try {
+    const parsed = JSON.parse(content);
+    if (Array.isArray(parsed)) return parsed;
+  } catch {}
+  return content ? [{ type: "text", value: content }] : [];
+}
+
+function PostContent({ content }: { content: string }) {
+  const blocks = parseBlocks(content);
+  return (
+    <div className="space-y-6">
+      {blocks.map((block, i) =>
+        block.type === "image" ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img key={i} src={block.url} alt="" className="w-full rounded-2xl" />
+        ) : (
+          <p key={i} className="break-keep text-[16px] leading-[2] text-[#444] sm:text-[17px] whitespace-pre-wrap">
+            {block.value}
+          </p>
+        )
+      )}
+    </div>
+  );
+}
+
 interface Post {
   id: string;
   title: string;
@@ -46,7 +74,7 @@ export default function BenefitDetailPage() {
               <img src={post.image} alt={post.title} className="max-w-full rounded-2xl" />
             </div>
           )}
-          <p className="break-keep text-[16px] leading-[2] text-[#444] sm:text-[17px]">{post.content}</p>
+          <PostContent content={post.content} />
           <div className="mt-14 border-t border-[#ececec] pt-8">
             <button
               onClick={() => router.back()}
