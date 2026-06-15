@@ -18,27 +18,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { adminFetch } from "@/lib/adminFetch";
+import TiptapEditor from "./TiptapEditor";
 
-// ─── Block types ───────────────────────────────────────────
-type TextBlock = { type: "text"; value: string };
-type ImageBlock = { type: "image"; url: string };
-type Block = TextBlock | ImageBlock;
-
-function parseBlocks(content: string): Block[] {
-  try {
-    const parsed = JSON.parse(content);
-    if (Array.isArray(parsed)) return parsed;
-  } catch {}
-  return content ? [{ type: "text", value: content }] : [];
-}
-
-function blocksPreview(content: string): string {
-  const blocks = parseBlocks(content);
-  const first = blocks.find((b) => b.type === "text") as TextBlock | undefined;
-  return first?.value ?? "";
-}
-
-// ─── Post types ────────────────────────────────────────────
 interface Post {
   id: string;
   title: string;
@@ -52,15 +33,23 @@ interface Props {
   title: string;
 }
 
-const EMPTY_FORM = { title: "", content: "[]", image: "" };
+const EMPTY_FORM = { title: "", content: "", image: "" };
 
-// ─── Image upload (단일) ───────────────────────────────────
-function ImgUpload({ value, onChange, label = "이미지 (선택)", hint = "권장 크기: 1200×630px · 최대 5MB · JPG/PNG" }: {
-  value: string;
-  onChange: (url: string) => void;
-  label?: string;
-  hint?: string;
-}) {
+// 목록 미리보기용 plain text 추출
+function stripHtml(html: string): string {
+  // 기존 블록 JSON 하위호환
+  try {
+    const parsed = JSON.parse(html);
+    if (Array.isArray(parsed)) {
+      const first = parsed.find((b: { type: string }) => b.type === "text") as { value: string } | undefined;
+      return first?.value ?? "";
+    }
+  } catch {}
+  return html.replace(/<[^>]+>/g, "").trim();
+}
+
+// ─── 썸네일 업로드 ─────────────────────────────────────────
+function ImgUpload({ value, onChange }: { value: string; onChange: (url: string) => void }) {
   const ref = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -77,8 +66,8 @@ function ImgUpload({ value, onChange, label = "이미지 (선택)", hint = "권�
   return (
     <div className="space-y-1.5">
       <div className="flex items-baseline gap-2">
-        <p className="text-[12px] font-semibold text-[#666]">{label}</p>
-        <p className="text-[11px] text-[#bbb]">{hint}</p>
+        <p className="text-[12px] font-semibold text-[#666]">썸네일 이미지 (선택)</p>
+        <p className="text-[11px] text-[#bbb]">목록 및 상단에 표시 · 권장 1200×630px</p>
       </div>
       {value ? (
         <div className="relative flex h-44 w-full items-center justify-center overflow-hidden rounded-xl border border-[#e8e8e8] bg-[#f8f8f8]">
@@ -112,127 +101,7 @@ function ImgUpload({ value, onChange, label = "이미지 (선택)", hint = "권�
   );
 }
 
-// ─── Block editor ──────────────────────────────────────────
-function BlockEditor({ blocks, onChange }: { blocks: Block[]; onChange: (b: Block[]) => void }) {
-  const fileRefs = useRef<Map<number, HTMLInputElement>>(new Map());
-  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
-
-  const update = (idx: number, block: Block) => {
-    const next = [...blocks];
-    next[idx] = block;
-    onChange(next);
-  };
-
-  const remove = (idx: number) => onChange(blocks.filter((_, i) => i !== idx));
-
-  const moveUp = (idx: number) => {
-    if (idx === 0) return;
-    const next = [...blocks];
-    [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
-    onChange(next);
-  };
-
-  const moveDown = (idx: number) => {
-    if (idx === blocks.length - 1) return;
-    const next = [...blocks];
-    [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
-    onChange(next);
-  };
-
-  const addText = () => onChange([...blocks, { type: "text", value: "" }]);
-  const addImage = () => onChange([...blocks, { type: "image", url: "" }]);
-
-  const handleImageFile = async (idx: number, file: File) => {
-    setUploadingIdx(idx);
-    const fd = new FormData();
-    fd.append("file", file);
-    const res = await adminFetch("/api/upload", { method: "POST", body: fd });
-    const { url } = await res.json() as { url: string };
-    update(idx, { type: "image", url });
-    setUploadingIdx(null);
-  };
-
-  return (
-    <div className="space-y-2">
-      {blocks.map((block, idx) => (
-        <div key={idx} className="group relative rounded-xl border border-[#e8e8e8] bg-[#fafafa] p-3">
-          {/* 블록 컨트롤 */}
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-[#bbb]">
-              {block.type === "text" ? "텍스트" : "이미지"}
-            </span>
-            <div className="flex items-center gap-1">
-              <button type="button" onClick={() => moveUp(idx)} disabled={idx === 0} className="flex h-6 w-6 items-center justify-center rounded text-[12px] text-[#bbb] hover:bg-[#eee] hover:text-[#555] disabled:opacity-30">↑</button>
-              <button type="button" onClick={() => moveDown(idx)} disabled={idx === blocks.length - 1} className="flex h-6 w-6 items-center justify-center rounded text-[12px] text-[#bbb] hover:bg-[#eee] hover:text-[#555] disabled:opacity-30">↓</button>
-              <button type="button" onClick={() => remove(idx)} className="flex h-6 w-6 items-center justify-center rounded text-[12px] text-[#bbb] hover:bg-red-50 hover:text-red-400">✕</button>
-            </div>
-          </div>
-
-          {block.type === "text" ? (
-            <textarea
-              value={block.value}
-              onChange={(e) => update(idx, { type: "text", value: e.target.value })}
-              rows={4}
-              placeholder="텍스트를 입력하세요"
-              className="w-full resize-y rounded-lg border border-[#e8e8e8] bg-white px-3 py-2 text-[13px] leading-relaxed outline-none focus:border-[#c90f45]"
-            />
-          ) : (
-            <div>
-              {block.url ? (
-                <div className="relative flex items-center justify-center overflow-hidden rounded-lg bg-[#f0f0f0]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={block.url} alt="" className="max-h-48 w-full object-contain" />
-                  <button
-                    type="button"
-                    onClick={() => update(idx, { type: "image", url: "" })}
-                    className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-[12px] text-white hover:bg-black/80"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => fileRefs.current.get(idx)?.click()}
-                  disabled={uploadingIdx === idx}
-                  className="flex h-20 w-full items-center justify-center rounded-lg border-2 border-dashed border-[#e0e0e0] text-[13px] text-[#aaa] hover:border-[#c90f45] hover:text-[#c90f45] disabled:opacity-50 transition-colors"
-                >
-                  {uploadingIdx === idx ? "업로드 중..." : "+ 이미지 선택"}
-                </button>
-              )}
-              <input
-                ref={(el) => { if (el) fileRefs.current.set(idx, el); else fileRefs.current.delete(idx); }}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => e.target.files?.[0] && handleImageFile(idx, e.target.files[0])}
-              />
-            </div>
-          )}
-        </div>
-      ))}
-
-      <div className="flex gap-2 pt-1">
-        <button
-          type="button"
-          onClick={addText}
-          className="flex h-9 items-center gap-1.5 rounded-full border border-[#e0e0e0] px-4 text-[12px] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45] transition-colors"
-        >
-          + 텍스트 추가
-        </button>
-        <button
-          type="button"
-          onClick={addImage}
-          className="flex h-9 items-center gap-1.5 rounded-full border border-[#e0e0e0] px-4 text-[12px] text-[#555] hover:border-[#c90f45] hover:text-[#c90f45] transition-colors"
-        >
-          + 이미지 추가
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ─── Post modal ────────────────────────────────────────────
+// ─── 게시글 모달 ───────────────────────────────────────────
 function PostModal({
   title,
   form,
@@ -248,13 +117,13 @@ function PostModal({
   onClose: () => void;
   saveLabel: string;
 }) {
-  const blocks = parseBlocks(form.content);
-  const hasContent = blocks.some((b) => b.type === "image" || (b.type === "text" && b.value.trim()));
+  const hasContent = form.content.replace(/<[^>]+>/g, "").trim().length > 0 ||
+    form.content.includes("<img");
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative z-10 flex max-h-[90vh] w-full max-w-xl flex-col rounded-2xl bg-white shadow-xl">
+      <div className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-[#f0f0f0] px-6 py-4">
           <h3 className="text-[16px] font-black text-[#1a1a1a]">{title}</h3>
           <button onClick={onClose} className="text-[20px] text-[#aaa] hover:text-[#555]">✕</button>
@@ -271,22 +140,17 @@ function PostModal({
             />
           </div>
 
-          {/* 본문 블록 에디터 */}
-          <div className="space-y-2">
+          {/* 본문 에디터 */}
+          <div className="space-y-1.5">
             <p className="text-[12px] font-semibold text-[#666]">본문 내용 <span className="text-[#c90f45]">*</span></p>
-            <BlockEditor
-              blocks={blocks}
-              onChange={(b) => onChange({ ...form, content: JSON.stringify(b) })}
+            <TiptapEditor
+              value={form.content}
+              onChange={(html) => onChange({ ...form, content: html })}
             />
           </div>
 
-          {/* 썸네일 이미지 */}
-          <ImgUpload
-            value={form.image}
-            onChange={(url) => onChange({ ...form, image: url })}
-            label="썸네일 이미지 (선택)"
-            hint="목록 및 상단에 표시 · 권장 1200×630px"
-          />
+          {/* 썸네일 */}
+          <ImgUpload value={form.image} onChange={(url) => onChange({ ...form, image: url })} />
         </div>
         <div className="flex gap-2 border-t border-[#f0f0f0] px-6 py-4">
           <button
@@ -308,7 +172,7 @@ function PostModal({
   );
 }
 
-// ─── Sortable row ──────────────────────────────────────────
+// ─── 목록 행 ───────────────────────────────────────────────
 function SortablePostRow({ post, onEdit, onDelete }: { post: Post; onEdit: () => void; onDelete: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: post.id });
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
@@ -330,10 +194,8 @@ function SortablePostRow({ post, onEdit, onDelete }: { post: Post; onEdit: () =>
       )}
       <div className="min-w-0 flex-1">
         <p className="truncate font-bold text-[#1a1a1a]">{post.title}</p>
-        <p className="mt-0.5 line-clamp-1 text-[13px] text-[#888]">{blocksPreview(post.content)}</p>
-        <p className="mt-1 text-[11px] text-[#bbb]">
-          {new Date(post.createdAt).toLocaleDateString("ko-KR")}
-        </p>
+        <p className="mt-0.5 line-clamp-1 text-[13px] text-[#888]">{stripHtml(post.content)}</p>
+        <p className="mt-1 text-[11px] text-[#bbb]">{new Date(post.createdAt).toLocaleDateString("ko-KR")}</p>
       </div>
       <div className="flex shrink-0 gap-2">
         <button

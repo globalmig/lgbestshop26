@@ -4,32 +4,18 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 
-type Block = { type: "text"; value: string } | { type: "image"; url: string };
-
-function parseBlocks(content: string): Block[] {
+function toHtml(content: string): string {
   try {
     const parsed = JSON.parse(content);
-    if (Array.isArray(parsed)) return parsed;
+    if (Array.isArray(parsed)) {
+      return parsed.map((b: { type: string; value?: string; url?: string }) =>
+        b.type === "image"
+          ? `<img src="${b.url}" />`
+          : `<p>${(b.value ?? "").replace(/\n/g, "<br/>")}</p>`
+      ).join("");
+    }
   } catch {}
-  return content ? [{ type: "text", value: content }] : [];
-}
-
-function PostContent({ content }: { content: string }) {
-  const blocks = parseBlocks(content);
-  return (
-    <div className="space-y-6">
-      {blocks.map((block, i) =>
-        block.type === "image" ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img key={i} src={block.url} alt="" className="w-full rounded-2xl" />
-        ) : (
-          <p key={i} className="break-keep text-[16px] leading-[2] text-[#444] sm:text-[17px] whitespace-pre-wrap">
-            {block.value}
-          </p>
-        )
-      )}
-    </div>
-  );
+  return content;
 }
 
 interface Post {
@@ -74,7 +60,10 @@ export default function SmeDetailPage() {
               <img src={post.image} alt={post.title} className="max-w-full rounded-2xl" />
             </div>
           )}
-          <PostContent content={post.content} />
+          <div
+            className="prose prose-lg max-w-none break-keep text-[#444] [&_img]:rounded-2xl [&_img]:w-full"
+            dangerouslySetInnerHTML={{ __html: toHtml(post.content) }}
+          />
           <div className="mt-14 border-t border-[#ececec] pt-8">
             <button
               onClick={() => router.back()}
