@@ -7,6 +7,8 @@ import HeroAdmin from "@/components/admin/HeroAdmin";
 import ConsultAdmin from "@/components/admin/ConsultAdmin";
 import ManagerAdmin from "@/components/admin/ManagerAdmin";
 import PostAdmin from "@/components/admin/PostAdmin";
+import FooterAdmin from "@/components/admin/FooterAdmin";
+import ConsultBannerAdmin from "@/components/admin/ConsultBannerAdmin";
 
 const NAV = [
   { id: "dashboard", label: "대시보드", icon: "⊞" },
@@ -15,6 +17,8 @@ const NAV = [
   { id: "managers", label: "매니저 관리", icon: "👤" },
   { id: "benefit", label: "혜택 & 이달의 소식", icon: "🎁" },
   { id: "smallbiz", label: "소상공인 소식", icon: "🏢" },
+  { id: "consult_banner", label: "문의하기 배너", icon: "💬" },
+  { id: "footer", label: "푸터 정보", icon: "📄" },
 ] as const;
 
 type TabId = (typeof NAV)[number]["id"];
@@ -327,6 +331,8 @@ export default function AdminPage() {
           {tab === "managers" && <ManagerAdmin />}
           {tab === "benefit" && <PostAdmin storeKey="benefit" title="혜택 & 이달의 소식" />}
           {tab === "smallbiz" && <PostAdmin storeKey="smallbiz" title="소상공인 소식" />}
+          {tab === "consult_banner" && <ConsultBannerAdmin />}
+          {tab === "footer" && <FooterAdmin />}
         </main>
       </div>
     </div>

@@ -2,7 +2,23 @@
 
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+type Settings = {
+  footer_company: string;
+  footer_ceo: string;
+  footer_reg_no: string;
+  footer_address: string;
+  footer_copyright: string;
+};
+
+const DEFAULTS: Settings = {
+  footer_company: "우주전자 전자랜드지점",
+  footer_ceo: "김진웅",
+  footer_reg_no: "106-85-38456",
+  footer_address: "서울특별시 용산구 청파로 74 용산전자랜드",
+  footer_copyright: "© 2025 LG Electronics Inc. All rights reserved.",
+};
 
 type ModalType = "privacy" | "terms" | null;
 
@@ -82,6 +98,14 @@ const TERMS = {
 export default function Footer() {
   const pathname = usePathname();
   const [modal, setModal] = useState<ModalType>(null);
+  const [settings, setSettings] = useState<Settings>(DEFAULTS);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json() as Promise<Partial<Settings>>)
+      .then((data) => setSettings({ ...DEFAULTS, ...data }))
+      .catch(() => {});
+  }, []);
 
   if (pathname.startsWith("/lgbs-7x4q2")) return null;
   const data = modal === "privacy" ? PRIVACY : modal === "terms" ? TERMS : null;
@@ -109,10 +133,10 @@ export default function Footer() {
           </nav>
 
           <div className="mb-3 space-y-1 text-[11px] text-[#bbb]">
-            <p>사업자명: 우주전자 전자랜드지점 &nbsp;|&nbsp; 대표: 김진웅 &nbsp;|&nbsp; 사업자등록번호: 106-85-38456</p>
-            <p>주소: 서울특별시 용산구 청파로 74 용산전자랜드</p>
+            <p>사업자명: {settings.footer_company} &nbsp;|&nbsp; 대표: {settings.footer_ceo} &nbsp;|&nbsp; 사업자등록번호: {settings.footer_reg_no}</p>
+            <p>주소: {settings.footer_address}</p>
           </div>
-          <p className="text-[11px] text-[#aaa]">© 2025 LG Electronics Inc. All rights reserved.</p>
+          <p className="text-[11px] text-[#aaa]">{settings.footer_copyright}</p>
         </div>
       </footer>
 
