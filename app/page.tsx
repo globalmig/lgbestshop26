@@ -10,14 +10,12 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "LG전자 베스트샵 용산점 | 가전 구독·소상공인·비대면 상담",
+    absolute: "LG전자 베스트샵 용산점 | 가전 구독·소상공인·비대면 상담.",
   },
-  description:
-    "LG전자 베스트샵 용산전자랜드점. 가전 구독, 소상공인 전용 혜택, 이달의 소식을 확인하고 비대면 상담을 신청하세요.",
+  description: "LG전자 베스트샵 용산전자랜드점. 가전 구독, 소상공인 전용 혜택, 이달의 소식을 확인하고 비대면 상담을 신청하세요.",
   openGraph: {
     title: "LG전자 베스트샵 용산점 | 가전 구독·소상공인·비대면 상담",
-    description:
-      "가전 구독부터 소상공인 전용 혜택까지, LG전자 베스트샵 용산전자랜드점에서 최적의 혜택을 받아보세요.",
+    description: "가전 구독부터 소상공인 전용 혜택까지, LG전자 베스트샵 용산전자랜드점에서 최적의 혜택을 받아보세요.",
     url: "/",
   },
 };
@@ -49,7 +47,6 @@ const quickLinks = [
     href: "/sme",
   },
 ];
-
 
 export default async function Home() {
   const blogPosts = await getNaverBlogPosts("lg_yongsan");
