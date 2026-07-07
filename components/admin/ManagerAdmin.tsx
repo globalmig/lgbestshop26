@@ -160,7 +160,7 @@ function SortableManagerRow({
               ⠿
             </button>
             <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-[#f0dde2]">
-              {manager.img && <Image src={manager.img} alt={manager.name} width={48} height={48} className="h-full w-full object-cover object-top" />}
+              {manager.img && <Image src={manager.img} alt={manager.name} width={48} height={48} className="h-full w-full object-cover object-top" unoptimized />}
             </div>
             <div>
               <p className="font-bold text-[#1a1a1a]">{manager.name} <span className="text-[13px] font-normal text-[#888]">{manager.store}</span></p>
